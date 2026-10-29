@@ -1,6 +1,8 @@
 // こんにゃくの動きの計算（画面なし）。同じ入力なら必ず同じ結果になる
 // 単位はメートル、y が上。ゲーム本体（index.html）と確かめ用のプログラムの両方で使う
 
+// はね方（REST：はね返りの強さ、VTH：これより遅くぶつかったらはねない）
+export const PHYS = { REST: .4, VTH: 2.5, STICK2: .3, MAXB: 2.4, TKEEP: .4 };
 export const DT = 1 / 120;          // 1回の計算で進める時間
 export const SUB = 4;               // その中をさらに細かく分ける
 export const GRAV = -12;
@@ -129,8 +131,9 @@ export function stepGame(g, hold) {
       let vx = (p.x - p.px) * DAMP, vy = (p.y - p.py) * DAMP; p.px = p.x; p.py = p.y;
       let ax = 0, ay = GRAV;
       for (const w of g.wind) if (p.x > w.x0 && p.x < w.x1 && p.y > w.y0 && p.y < w.y1) { ax += w.fx; ay += w.fy; }
-      p.x += vx + ax * h2; p.y += vy + ay * h2; p.ct = 0; p.chit = 0;
+      p.x += vx + ax * h2; p.y += vy + ay * h2; p.ct = 0; p.chit = 0; p.cob = 0;
     }
+    let m0x = 0, m0y = 0; for (const p of P) { m0x += p.x - p.px; m0y += p.y - p.py; } m0x /= P.length; m0y /= P.length;
     for (let it = 0; it < 3; it++) {
       for (const [a, b, L, k] of C) {
         const A = P[a], B = P[b], dx = B.x - A.x, dy = B.y - A.y, d = Math.hypot(dx, dy) || 1e-6, e = (d - L) / d * .5 * k;
@@ -143,19 +146,39 @@ export function stepGame(g, hold) {
       // 物
       for (const o of g.objs) {
         const Q1 = lerpP(o.prevPose, o.pose), Q0 = lerp0(o.prevPose, o.pose);
-        for (const p of P) for (const part of o.parts) if (collide(p, part, Q0, Q1, last)) p.ct |= o.tgt ? 1 : 4;
+        for (const p of P) for (const part of o.parts) if (collide(p, part, Q0, Q1, last)) { p.ct |= o.tgt ? 1 : 4; if (last) p.cob = 1; }
       }
     }
-    // はね返りをおさえる：当たった面の向きにこんにゃく全体が離れていく速さを、BOUNCE まで減らす
+    // はねる：物にぶつかった瞬間だけ、ぶつかった速さの REST 倍ではね返す（フライパンでははねない）
+    {
+      let bn = 0, bX = 0, bY = 0, bsX = 0, bsY = 0;
+      for (const p of P) if (p.cob && p.chit) { bn++; bX += p.cnx; bY += p.cny; bsX += p.csx; bsY += p.csy; }
+      const REST = g.st.rest ?? PHYS.REST;
+      if (bn && REST > 0) {
+        const L = Math.hypot(bX, bY) || 1; bX /= L; bY /= L; bsX /= bn; bsY /= bn;
+        const vin = -((m0x - bsX) * bX + (m0y - bsY) * bY) / h;
+        if (vin > PHYS.VTH) {
+          let mvx = 0, mvy = 0; for (const p of P) { mvx += p.x - p.px; mvy += p.y - p.py; } mvx /= P.length; mvy /= P.length;
+          const now = ((mvx - bsX) * bX + (mvy - bsY) * bY) / h, want = Math.min(REST * vin, g.st.maxb ?? PHYS.MAXB);
+          if (want > now) { const e = (want - now) * h; for (const p of P) { p.px -= e * bX; p.py -= e * bY; } }
+          // 横すべりはぶつかった瞬間に大きく減らす（その場でぼよんと跳ねる）
+          const tX = (mvx - bsX) - now * h * bX, tY = (mvy - bsY) - now * h * bY, kt = 1 - (g.st.tkeep ?? PHYS.TKEEP);
+          for (const p of P) { p.px += tX * kt; p.py += tY * kt; }
+          g.bounceT = g.t; g.bounceV = want; g.bounces = (g.bounces || 0) + 1;
+        }
+      }
+    }
+    const justBounced = g.t - (g.bounceT ?? -9) < .1;
+    // はね返りをおさえる：当たった面の向きにこんにゃく全体が離れていく速さを、BOUNCE まで減らす（はねた直後はおさえない）
     let cn = 0, nX = 0, nY = 0, sX = 0, sY = 0;
     for (const p of P) if (p.chit) { cn++; nX += p.cnx; nY += p.cny; sX += p.csx; sY += p.csy; }
     if (cn) {
       const L = Math.hypot(nX, nY) || 1; nX /= L; nY /= L; sX /= cn; sY /= cn;
       let mvx = 0, mvy = 0; for (const p of P) { mvx += p.x - p.px; mvy += p.y - p.py; } mvx /= P.length; mvy /= P.length;
-      const vn = (mvx - sX) * nX + (mvy - sY) * nY, lim = BOUNCE * h;
+      const vn = (mvx - sX) * nX + (mvy - sY) * nY, lim = (justBounced ? Math.max(BOUNCE, g.bounceV || 0) : BOUNCE) * h;
       if (vn > lim) { const e = vn - lim; for (const p of P) { p.px += e * nX; p.py += e * nY; } }
       // べちゃっと貼りつく：面にそってすべる速さも、こんにゃく全体で減らす（触れている点が多いほど強く）
-      const tvx = (mvx - sX) - vn * nX, tvy = (mvy - sY) - vn * nY, k = Math.min(1, STICK * Math.min(1, cn / 3));
+      const tvx = (mvx - sX) - vn * nX, tvy = (mvy - sY) - vn * nY, k = Math.min(1, PHYS.STICK2 * Math.min(1, cn / 3));
       for (const p of P) { p.px += tvx * k; p.py += tvy * k; }
     }
   }

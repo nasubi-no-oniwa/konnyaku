@@ -57,13 +57,17 @@ export const STAGES = [
     { tgt: 1, vis: 'balloon', col: 0xe8352b, x: 5.4, y: 2.5, mv: { ay: .25, w: 1.3 }, parts: [C(0, 0, .42)] },
     { tgt: 1, vis: 'balloon', col: 0x2fb36b, x: 6.6, y: 2.5, mv: { ay: .25, w: 1.3, ph: Math.PI }, parts: [C(0, 0, .42)] }] },
   { name: ['風船', 'Balloon', '氣球', '풍선'], objs: [{ tgt: 1, vis: 'balloon', col: 0xe8352b, x: 5.0, y: 2.3, parts: [C(0, 0, .6)] }] },
-  { name: ['細い柱', 'Thin pillar', '細柱', '가는 기둥'], objs: [{ tgt: 1, vis: 'stone', col: 0xc9c2b4, x: 6.0, y: 1.4, parts: [B(0, 0, .34, 2.8)] }] },
+  { name: ['細い柱', 'Thin pillar', '細柱', '가는 기둥'], objs: [{ tgt: 1, vis: 'stone', col: 0xc9c2b4, x: 6.0, y: 1.4, parts: [B(0, 0, .6, 2.8)] }] },
   { name: ['ゆれる風船', 'Bobbing balloon', '搖晃的氣球', '흔들리는 풍선'], objs: [{ tgt: 1, vis: 'balloon', col: 0xe8352b, x: 5.6, y: 2.4, mv: { ay: .55, w: 1.5 }, parts: [C(0, 0, .55)] }] },
-  { name: ['小さい風船', 'Tiny balloon', '小氣球', '작은 풍선'], objs: [{ tgt: 1, vis: 'balloon', col: 0x2fb36b, x: 6.0, y: 2.4, parts: [C(0, 0, .36)] }] },
+  { name: ['小さい風船', 'Tiny balloon', '小氣球', '작은 풍선'], objs: [{ tgt: 1, vis: 'balloon', col: 0x2fb36b, x: 6.0, y: 2.4, parts: [C(0, 0, .44)] }] },
   { name: ['棒人間の頭', "Stick man's head", '火柴人的頭', '막대인간 머리'], objs: [
     { tgt: 1, vis: 'body', col: 0xd3d1cb, x: 6.0, y: 2.65, parts: [C(0, 0, .32)] },
     { tgt: 0, vis: 'body', col: 0xd3d1cb, x: 6.0, y: 2.65, parts: [S(0, -.38, 0, -1.4, .14), S(0, -1.4, -.35, -2.6, .1), S(0, -1.4, .35, -2.6, .1), S(0, -.6, -.55, -1.2, .08), S(0, -.6, .55, -1.2, .08)] }] },
-  { name: ['上昇気流', 'Updraft', '上升氣流', '상승 기류'], wind: [{ x0: 6.6, x1: 8.4, y0: 0, y1: 9, fx: 0, fy: 9 }], objs: [{ tgt: 1, vis: 'ball', col: 0xe8352b, x: 7.5, y: 2.6, parts: [C(0, 0, .34)] }] },
+  { name: ['上昇気流', 'Updraft', '上升氣流', '상승 기류'], wind: [{ x0: 6.6, x1: 8.4, y0: 0, y1: 9, fx: 0, fy: 9 }], objs: [{ tgt: 1, vis: 'ball', col: 0xe8352b, x: 7.5, y: 2.6, parts: [C(0, 0, .42)] }] },
   { name: ['なすび王', 'Eggplant King', '茄子王', '가지 왕'], objs: [
     { tgt: 1, vis: 'nasu', col: 0x5b2a86, x: 7.0, y: 1.0, a: -.25, mv: { ax: .9, w: 1.0, ra: .32, rww: 1.7 }, parts: [C(0, 0, .85), C(.1, .8, .66), C(.18, 1.4, .44), S(.2, 1.7, .3, 2.15, .1)] }] },
 ];
+
+// 面ごとのはね返りの強さ（2026-10-29 跳ねる版）。全面がクリアできるように総当たりで決めた
+const REST = [.6, .6, .42, .6, .6, .6, .6, .6, .5, .6, .28, .42, .6, .6, .6, .6, .42, .6, .6, .2, .6, .6, .6, .6, .3, .6, .3, .35, .3, .42];
+STAGES.forEach((s, i) => { s.rest = REST[i]; });
