@@ -357,7 +357,7 @@ const KZ = .3;
 // 見た目だけのぶるんぶるん：こんにゃくの中心の加速度でゆらす（当たり判定・クリア判定は変えない）
 const jelly = {
   q: 0, qv: 0, s: 0, sv: 0, r: 0, rv: 0, pv: null, pc: null, pa: null, pw: 0,
-  reset() { this.q = this.qv = this.s = this.sv = this.r = this.rv = 0; this.pv = this.pc = this.pa = null; },
+  reset() { this.q = this.qv = this.s = this.sv = this.r = this.rv = 0; this.pv = this.pc = this.pa = this.ma = null; },
   step(g, res) {
     const P = g.k.P, D = SIM.DT; let cx = 0, cy = 0; for (const p of P) { cx += p.x; cy += p.y; } cx /= P.length; cy /= P.length;
     const NX = SIM.NX, NY = SIM.NY; let lx = 0, ly = 0, rx = 0, ry = 0;
@@ -369,13 +369,17 @@ const jelly = {
     if (!this.pv) { this.pv = [vx, vy]; this.pw = w; return; }
     let ax = (vx - this.pv[0]) / D, ay = (vy - this.pv[1]) / D, aw = (w - this.pw) / D; this.pv = [vx, vy]; this.pw = w;
     const lim = 900; ax = clamp(ax, -lim, lim); ay = clamp(ay, -lim, lim); aw = clamp(aw, -6000, 6000);
+    // ずっと同じ向きにかかる力（飛んでいる間の重力など）は引いて、変わった分だけでゆらす
+    if (!this.ma) this.ma = [ax, ay]; const kk = Math.min(1, D / .25); this.ma[0] += (ax - this.ma[0]) * kk; this.ma[1] += (ay - this.ma[1]) * kk;
+    ax -= this.ma[0]; ay -= this.ma[1];
     const nx = -Math.sin(ang), ny = Math.cos(ang), an = ax * nx + ay * ny, at = ax * Math.cos(ang) + ay * Math.sin(ang);
     // 曲がる揺れ（両はしが上下に）・つぶれる揺れ・ねじれ（左右のはしが逆に）
-    const W1 = 2 * Math.PI * 3.0, W2 = 2 * Math.PI * 4.2, W3 = 2 * Math.PI * 3.6;
-    this.qv += (-W1 * W1 * this.q - 2 * .045 * W1 * this.qv - an * 1.25) * D; this.q += this.qv * D;
-    this.sv += (-W2 * W2 * this.s - 2 * .06 * W2 * this.sv - an * 1.9 + Math.abs(at) * .25) * D; this.s += this.sv * D;
-    this.rv += (-W3 * W3 * this.r - 2 * .06 * W3 * this.rv - aw * .016) * D; this.r += this.rv * D;
-    this.q = clamp(this.q, -.42, .42); this.s = clamp(this.s, -.45, .45); this.r = clamp(this.r, -.35, .35);
+    // ゆっくり大きく（ぶよんぶよん）
+    const W1 = 2 * Math.PI * 2.0, W2 = 2 * Math.PI * 2.6, W3 = 2 * Math.PI * 2.2;
+    this.qv += (-W1 * W1 * this.q - 2 * .03 * W1 * this.qv - an * 1.6) * D; this.q += this.qv * D;
+    this.sv += (-W2 * W2 * this.s - 2 * .045 * W2 * this.sv - an * 2.3 + Math.abs(at) * .3) * D; this.s += this.sv * D;
+    this.rv += (-W3 * W3 * this.r - 2 * .04 * W3 * this.rv - aw * .024) * D; this.r += this.rv * D;
+    this.q = clamp(this.q, -1.2, 1.2); this.s = clamp(this.s, -1.2, 1.2); this.r = clamp(this.r, -1, 1);
   },
 };
 const kon = (() => {
@@ -418,7 +422,8 @@ const kon = (() => {
       const ang = Math.atan2((a.y + m.y) - (b.y + c.y), (a.x + m.x) - (b.x + c.x)), ex = Math.cos(ang), ey = Math.sin(ang), nx = -ey, ny = ex, half = SIM.KW / 2 + SIM.PR;
       for (const q of Q) {
         const rx = q.x - cx, ry = q.y - cy, u = clamp((rx * ex + ry * ey) / half, -1.2, 1.2), v = rx * nx + ry * ny;
-        const dn = jelly.q * (u * u - .33) + v * jelly.s + jelly.r * u * .5 * Math.abs(u), de = -(u * half) * jelly.s * .35;
+        const jq = .62 * Math.tanh(jelly.q / .62), js = .55 * Math.tanh(jelly.s / .55), jr = .5 * Math.tanh(jelly.r / .5);
+        const dn = jq * (u * u - .33) + v * js + jr * u * .5 * Math.abs(u), de = -(u * half) * js * .4;
         q.x += nx * dn + ex * de; q.y += ny * dn + ey * de;
       } }
     const P = Q;
@@ -534,7 +539,7 @@ function toScreen(x, y, z = 0) { const p = V3(x, y, z).project(camera); return {
 
 /* ===================== ゲームの流れ ===================== */
 let mode = 'title', cur = 0, G = null, hold = false, acc = 0, msgT = 0, lastSplat = 0, prevContacts = 0, clearAt = 0;
-const PROG = () => lsGet('kj_prog') || { open: 1, best: {} };
+const PROG = () => { const p = lsGet('kj_prog') || { best: {} }; p.best = p.best || {}; p.open = 30; return p; };
 function saveBest(i, ms) { const p = PROG(); if (!p.best[i] || ms < p.best[i]) p.best[i] = ms; p.open = Math.max(p.open, Math.min(30, i + 2)); lsSet('kj_prog', p); }
 const showPanel = id => ['#title', '#selectP', '#clearP'].forEach(p => $(p).hidden = p !== id);
 function bigMsg(t, sub = '', cls = '', dur = 1.2) { $('#msgBig').textContent = t; $('#msgBig').className = cls; $('#msgSub').textContent = sub; $('#msg').hidden = !t; msgT = dur; }
@@ -565,7 +570,7 @@ function openSelect() {
     grid.appendChild(b);
   }
 }
-$('#goPlay').onclick = guard(() => { const p = PROG(); startStage(Math.min(p.open - 1, 29)); });
+$('#goPlay').onclick = guard(() => { const p = PROG(); let i = 0; while (i < 29 && p.best[i]) i++; startStage(i); });
 $('#goSelect').onclick = guard(openSelect);
 $('#selBack').onclick = guard(toTitle);
 $('#backBtn').onclick = guard(openSelect);
