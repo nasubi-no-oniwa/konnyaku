@@ -51,7 +51,10 @@ button:focus-visible{outline:3px solid var(--karashi);outline-offset:2px}
 button.chip{cursor:pointer}
 #stInfo{flex:1;min-width:0;text-align:center}
 #stInfo b{display:block;font-family:var(--disp);font-weight:400;font-size:16px;color:var(--karashi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#stInfo span{font-size:11px;opacity:.85}
+#stInfo span{font-size:11px;opacity:.85;display:block}
+#stInfo #stTop{color:var(--karashi);opacity:1}
+.hcol{display:flex;flex-direction:column;gap:6px}
+#redoBtn{background:rgba(214,69,47,.92)}
 #timeBox{text-align:right;min-width:86px}
 #timeBox b{display:block;font-family:var(--disp);font-weight:400;font-size:20px;font-variant-numeric:tabular-nums;color:var(--cream)}
 #timeBox span{font-size:11px;opacity:.85}
@@ -120,8 +123,8 @@ button.chip{cursor:pointer}
   <div id="stillRing" hidden></div>
   <div id="upMark" hidden>▲</div>
   <div id="hud" hidden>
-    <button class="chip" id="backBtn" data-i="menu">面えらび</button>
-    <div class="chip" id="stInfo"><b id="stName"></b><span id="stNo"></span></div>
+    <div class="hcol"><button class="chip" id="backBtn" data-i="menu">面えらび</button><button class="chip" id="redoBtn" data-i="redo">やり直す</button></div>
+    <div class="chip" id="stInfo"><b id="stName"></b><span id="stNo"></span><span id="stTop"></span></div>
     <div class="chip" id="timeBox"><b id="tNow">0.00</b><span id="tFail"></span></div>
   </div>
   <div id="msg" hidden><div id="msgBig"></div><div id="msgSub"></div></div>
@@ -135,6 +138,7 @@ button.chip{cursor:pointer}
       <p class="sub" data-i="sub">おでんの鍋から逃げたこんにゃくを、変なところに乗せろ。</p>
       <button class="big" id="goPlay" data-i="play">はじめる</button>
       <button class="big k" id="goSelect" data-i="select">面をえらぶ</button>
+      <button class="big alt" id="goldBtn" hidden></button>
       <p class="note" id="titleNote"></p>
       <div class="langs" role="group" aria-label="Language"><button data-lang="ja">日本語</button><button data-lang="en">English</button><button data-lang="zh">繁中</button><button data-lang="ko">한국어</button></div>
     </div>
@@ -163,6 +167,7 @@ button.chip{cursor:pointer}
       <ol class="rlist" id="rlist"></ol>
       <button class="big" id="clNext" data-i="next">次の面へ</button>
       <div class="row2"><button class="big alt" id="clRetry" data-i="retry">もう一回</button><button class="big alt" id="clMenu" data-i="menu">面えらび</button></div>
+      <button class="big k" id="clVid" hidden data-i="vid">🎬 クリア動画を保存</button>
       <button class="big x" id="clShare" data-i="share">Xに投稿</button>
     </div>
   </div>
@@ -194,6 +199,7 @@ const TX = {
     next: '次の面へ', retry: 'もう一回', share: 'Xに投稿', allClear: '全30面クリア！',
     rLoading: '読みこみ中…', rEmpty: 'まだだれもいません。1位になれる', rFail: 'つながりませんでした',
     shareT: 'こんにゃくを「{name}」に{t}秒で着地させた（{n}面）', locked: 'まだ', wind: '風', ghost: '見えない壁がある…',
+    redo: 'やり直す', top1: '1位 {t}秒', top1none: '1位はまだいない', mine: '自分 {t}秒', gold: '金のこんにゃく', goldOn: '金のこんにゃく：ON', goldOff: '金のこんにゃく：OFF', goldGet: '金のこんにゃくになった！', goldLock: '全30面クリアで金のこんにゃく（{n}/30）', vid: '🎬 クリア動画を保存', vidMaking: '動画を作っています…',
     tags: '#とんでこんにゃく',
   },
   en: {
@@ -206,6 +212,7 @@ const TX = {
     next: 'Next stage', retry: 'Again', share: 'Post to X', allClear: 'All 30 stages cleared!',
     rLoading: 'Loading…', rEmpty: 'Nobody yet. You can be #1', rFail: "Couldn't connect",
     shareT: 'I landed a konnyaku on "{name}" in {t}s (stage {n})', locked: '—', wind: 'Wind', ghost: 'There is an invisible wall…',
+    redo: 'Retry', top1: '#1 {t}s', top1none: 'No #1 yet', mine: 'You {t}s', gold: 'Golden Konnyaku', goldOn: 'Golden Konnyaku: ON', goldOff: 'Golden Konnyaku: OFF', goldGet: 'You got the Golden Konnyaku!', goldLock: 'Clear all 30 for the Golden Konnyaku ({n}/30)', vid: '🎬 Save clear video', vidMaking: 'Making the video…',
     tags: '#とんでこんにゃく',
   },
   zh: {
@@ -218,6 +225,7 @@ const TX = {
     next: '下一關', retry: '再一次', share: '發到X', allClear: '全30關通關！',
     rLoading: '讀取中…', rEmpty: '還沒有人。你可以拿第1', rFail: '無法連線',
     shareT: '我用{t}秒讓蒟蒻降落在「{name}」上（第{n}關）', locked: '—', wind: '風', ghost: '有一道看不見的牆…',
+    redo: '重來', top1: '第1名 {t}秒', top1none: '還沒有第1名', mine: '自己 {t}秒', gold: '黃金蒟蒻', goldOn: '黃金蒟蒻：ON', goldOff: '黃金蒟蒻：OFF', goldGet: '變成黃金蒟蒻了！', goldLock: '通關全30關就能得到黃金蒟蒻（{n}/30）', vid: '🎬 儲存通關影片', vidMaking: '影片製作中…',
     tags: '#とんでこんにゃく',
   },
   ko: {
@@ -230,6 +238,7 @@ const TX = {
     next: '다음 스테이지', retry: '한 번 더', share: 'X에 올리기', allClear: '30스테이지 전부 클리어!',
     rLoading: '불러오는 중…', rEmpty: '아직 아무도 없어요. 1등이 될 수 있어', rFail: '연결하지 못했어요',
     shareT: '곤약을 「{name}」에 {t}초 만에 착지시켰다 ({n}스테이지)', locked: '—', wind: '바람', ghost: '보이지 않는 벽이 있다…',
+    redo: '다시', top1: '1위 {t}초', top1none: '아직 1위가 없어요', mine: '나 {t}초', gold: '황금 곤약', goldOn: '황금 곤약: ON', goldOff: '황금 곤약: OFF', goldGet: '황금 곤약이 되었다!', goldLock: '30스테이지 전부 클리어하면 황금 곤약 ({n}/30)', vid: '🎬 클리어 영상 저장', vidMaking: '영상을 만드는 중…',
     tags: '#とんでこんにゃく',
   },
 };
@@ -251,16 +260,17 @@ function applyLang() {
   document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === LANG));
   document.title = tr('title');
 }
-document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG = b.dataset.lang; lsSet('kj_lang', LANG); applyLang(); });
+document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG = b.dataset.lang; lsSet('kj_lang', LANG); applyLang(); updGold(); });
 
 /* ===================== 音 ===================== */
 let ac = null;
-function audioOn() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); }
+let OUTN = null, RECDEST = null;
+function audioOn() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); OUTN = ac.createGain(); OUTN.connect(ac.destination); try { RECDEST = ac.createMediaStreamDestination(); OUTN.connect(RECDEST); } catch (_) { RECDEST = null; } } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); }
 function tone(f0, f1, dur, vol, type = 'sine', delay = 0) {
   if (!ac) return; const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + delay;
   o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+  o.connect(g).connect(OUTN); o.start(t); o.stop(t + dur + .02);
 }
 function noise(dur, f0, f1, vol, type = 'bandpass') {
   if (!ac) return; const n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
@@ -268,9 +278,10 @@ function noise(dur, f0, f1, vol, type = 'bandpass') {
   const s = ac.createBufferSource(); s.buffer = b; const f = ac.createBiquadFilter(); f.type = type; f.Q.value = 1;
   const t = ac.currentTime; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
   const g = ac.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  s.connect(f).connect(g).connect(ac.destination); s.start();
+  s.connect(f).connect(g).connect(OUTN); s.start();
 }
 const SND = {
+  purun(a) { const v = Math.min(.16, .04 + a * .3); tone(300 + a * 160, 150, .16, v, 'sine'); tone(520 + a * 200, 260, .1, v * .5, 'triangle', .015); },
   flip(p) { tone(180 + p * 220, 520 + p * 500, .18, .25, 'triangle'); noise(.12, 800, 2600, .2); },
   boing() { tone(220, 90, .22, .2, 'sine'); tone(330, 140, .18, .08, 'triangle', .02); },
   splat() { noise(.16, 1200, 300, .35); tone(140, 70, .12, .2); },
@@ -337,6 +348,25 @@ const pot = new THREE.Group(); scene.add(pot);
     o.position.set(x, -2.05, (i % 2 ? .5 : -.4)); pot.add(o);
   }
 }
+// おだしのしぶき
+const drops = [];
+{
+  const dm = new THREE.MeshStandardMaterial({ color: 0xf0c070, roughness: .1, transparent: true, opacity: .75, emissive: 0x3a2000 });
+  const dg = new THREE.SphereGeometry(.055, 8, 6);
+  for (let i = 0; i < 40; i++) { const d = new THREE.Mesh(dg, dm); d.visible = false; d.userData = { life: 0 }; scene.add(d); drops.push(d); }
+}
+const ripple = new THREE.Mesh(new THREE.RingGeometry(.3, .42, 40), new THREE.MeshBasicMaterial({ color: 0xfff1d0, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+ripple.rotation.x = -Math.PI / 2; scene.add(ripple); ripple.userData.life = 0;
+function splash(x, v) {
+  const n = 40, sp = clamp(v * 1.2, 5, 11);
+  drops.forEach((d, i) => { const a = Math.PI * (.15 + .7 * Math.random()), s = sp * (.35 + Math.random() * .6);
+    d.position.set(x + (Math.random() - .5) * .8, -2.15, (Math.random() - .5) * 1.4); d.userData.v = [Math.cos(a) * s * .8, Math.sin(a) * s, (Math.random() - .5) * 3]; d.userData.life = .9 + Math.random() * .4; d.visible = true; d.scale.setScalar(.5 + Math.random() * .8); });
+  ripple.position.set(x, -2.14, 0); ripple.userData.life = 1; ripple.scale.setScalar(1);
+}
+function stepFx(dt) {
+  for (const d of drops) { if (d.userData.life <= 0) continue; d.userData.life -= dt; const v = d.userData.v; v[1] -= 14 * dt; d.position.x += v[0] * dt; d.position.y += v[1] * dt; d.position.z += v[2] * dt; if (d.userData.life <= 0 || d.position.y < -2.3) { d.visible = false; d.userData.life = 0; } }
+  if (ripple.userData.life > 0) { ripple.userData.life -= dt * 1.1; const u = 1 - ripple.userData.life; ripple.scale.setScalar(1 + u * 5); ripple.material.opacity = Math.max(0, ripple.userData.life) * .8; }
+}
 // 湯気
 const steam = [];
 {
@@ -353,6 +383,7 @@ const konTex = canvasTex(256, 96, (c, w, h) => {
   c.strokeStyle = '#1b1a19'; c.lineWidth = 3; c.beginPath(); c.arc(w * .5, h * .55, 7, .3, Math.PI - .3); c.stroke();
 });
 const konM = new THREE.MeshStandardMaterial({ map: konTex, color: 0xdde3ea, roughness: .2, metalness: 0 });
+const goldM = new THREE.MeshStandardMaterial({ map: konTex, color: 0xffd040, roughness: .28, metalness: .3, emissive: 0x8a5c00, emissiveIntensity: .55 });
 const KZ = .3;
 // 見た目だけのぶるんぶるん：こんにゃくの中心の加速度でゆらす（当たり判定・クリア判定は変えない）
 const jelly = {
@@ -518,13 +549,21 @@ function stageRect(st) {
   }
   return { x0: .05, x1: x1 + .45, y0: -2.45, y1: Math.max(y1, SIM.PAN.y + 3.2) + .4 };
 }
+const CAM = { z: 1, fx: 0, fy: 0, follow: false };
 function fitCam() {
   const st = STAGES[cur] || STAGES[0], R = stageRect(st);
   const top = 74, bot = 78, Hs = Math.max(100, VH - top - bot);
-  const w = R.x1 - R.x0, h = R.y1 - R.y0, s = Math.min(VW / w, Hs / h); // 1mあたりの画素
-  const cx = (R.x0 + R.x1) / 2 + (VW / s - w) * 0 ;
+  const w = R.x1 - R.x0, h = R.y1 - R.y0, s0 = Math.min(VW / w, Hs / h); // 1mあたりの画素
+  // 飛んでいる間は寄る（縦長の画面ほど大きく寄る）
+  const zMax = VW < VH ? 1.55 : 1.3, z = 1 + (zMax - 1) * CAM.z, s = s0 * z;
+  let cx = (R.x0 + R.x1) / 2;
   // 下をそろえる（余った分は空）
-  const yc = R.y0 + (VH - bot) / s - VH / 2 / s;
+  let yc = R.y0 + (VH - bot) / s - VH / 2 / s;
+  if (CAM.z > .001) {
+    const hw = VW / s / 2, tx = clamp(CAM.fx, R.x0 + hw, Math.max(R.x0 + hw, R.x1 + 3.5 - hw));
+    cx = cx + (tx - cx) * CAM.z;
+    const ty = Math.max(yc, CAM.fy - VH / s * .08); yc = yc + (ty - yc) * CAM.z;
+  }
   const dist = 40; camera.fov = 2 * Math.atan(VH / s / 2 / dist) * 180 / Math.PI; camera.aspect = VW / VH;
   // 少し上・少し右から見下ろす（物の上の面や厚みが見えるように）
   camera.position.set(cx + 3, yc + 6, dist); camera.lookAt(cx, yc, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
@@ -537,10 +576,66 @@ function fitCam() {
 function resize() { VW = innerWidth; VH = innerHeight; renderer.setSize(VW, VH, false); fitCam(); }
 function toScreen(x, y, z = 0) { const p = V3(x, y, z).project(camera); return { x: (p.x + 1) / 2 * VW, y: (1 - p.y) / 2 * VH }; }
 
+/* ===================== クリア動画（飛んでから着地まで） ===================== */
+const REC = {
+  ok: typeof MediaRecorder !== 'undefined' && !!HTMLCanvasElement.prototype.captureStream,
+  rec: null, blob: null, cv: null, ctx: null, on: false, ms: 0, onready: null, mime: '', st: 0,
+  pickMime() { for (const m of ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']) { try { if (MediaRecorder.isTypeSupported(m)) return m; } catch (_) { } } return ''; },
+  start() {
+    if (!this.ok || MANUAL) return; this.cancel();
+    try {
+      const w = Math.min(720, canvas.width) & ~1, h = Math.round(w * canvas.height / canvas.width) & ~1;
+      if (!this.cv) { this.cv = document.createElement('canvas'); this.ctx = this.cv.getContext('2d'); }
+      this.cv.width = w; this.cv.height = h; this.draw(true);
+      const stream = this.cv.captureStream(30);
+      if (RECDEST) RECDEST.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+      this.mime = this.pickMime();
+      const r = new MediaRecorder(stream, this.mime ? { mimeType: this.mime, videoBitsPerSecond: 3500000 } : {}), chunks = [];
+      r.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+      r.onstop = () => { if (r._keep && chunks.length) { this.blob = new Blob(chunks, { type: (this.mime || 'video/webm').split(';')[0] }); this.onready && this.onready(); } if (this.rec === r) this.rec = null; };
+      this.rec = r; this.on = true; this.ms = 0; this.st = cur; r.start(250);
+    } catch (_) { this.rec = null; this.on = false; }
+  },
+  cancel() { const r = this.rec; this.rec = null; this.on = false; this.blob = null; if (r) { r._keep = false; try { r.stop(); } catch (_) { } } },
+  finish(ms) { const r = this.rec; if (!r) return; this.ms = ms; r._keep = true; setTimeout(() => { if (this.rec === r) { this.on = false; try { r.stop(); } catch (_) { } } }, 1900); },
+  ready() { return !!this.blob; },
+  draw(force) {
+    if (!this.on && !force) return; const c = this.ctx, w = this.cv.width, h = this.cv.height, u = w / 360;
+    c.drawImage(canvas, 0, 0, w, h);
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+    c.fillStyle = 'rgba(43,29,18,.88)'; c.beginPath(); c.roundRect(w / 2 - 120 * u, 10 * u, 240 * u, 46 * u, 10 * u); c.fill();
+    c.fillStyle = '#f2b705'; c.font = `${16 * u}px "Dela Gothic One", sans-serif`; c.fillText(`${this.st + 1}. ${stName(this.st)}`, w / 2, 26 * u);
+    c.fillStyle = '#f7efdc'; c.font = `900 ${14 * u}px "Zen Kaku Gothic New", sans-serif`; c.fillText(`${fmt((G ? G.t : 0) * 1000)} ${tr('sec')}`, w / 2, 45 * u);
+    if (mode === 'clear') {
+      c.font = `${54 * u}px "Dela Gothic One", sans-serif`; c.lineWidth = 8 * u; c.strokeStyle = '#2b1d12'; c.fillStyle = '#f2b705';
+      c.strokeText(tr('landed'), w / 2, h * .3); c.fillText(tr('landed'), w / 2, h * .3);
+      c.font = `${40 * u}px "Dela Gothic One", sans-serif`; c.fillStyle = '#fff'; const t = `${fmt(this.ms)} ${tr('sec')}`;
+      c.strokeText(t, w / 2, h * .3 + 58 * u); c.fillText(t, w / 2, h * .3 + 58 * u);
+    }
+    c.fillStyle = 'rgba(43,29,18,.8)'; c.fillRect(0, h - 40 * u, w, 40 * u);
+    c.fillStyle = '#f7efdc'; c.font = `900 ${13 * u}px "Zen Kaku Gothic New", sans-serif`; c.fillText(`${tr('title')}  nasubi-no-oniwa.github.io/konnyaku`, w / 2, h - 20 * u);
+  },
+};
+$('#clVid').onclick = async () => {
+  if (!REC.blob || !last) return;
+  const ext = REC.blob.type.includes('mp4') ? 'mp4' : 'webm', name = `konnyaku_${last.st + 1}_${fmt(last.ms)}.${ext}`;
+  const file = new File([REC.blob], name, { type: REC.blob.type });
+  const text = tr('shareT', { name: stName(last.st), t: fmt(last.ms), n: last.st + 1 }) + '\n' + tr('tags') + '\n' + GAME_URL + '?st=' + (last.st + 1);
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(REC.blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+};
+
 /* ===================== ゲームの流れ ===================== */
-let mode = 'title', cur = 0, G = null, hold = false, acc = 0, msgT = 0, lastSplat = 0, prevContacts = 0, clearAt = 0;
+let mode = 'title', cur = 0, G = null, hold = false, acc = 0, msgT = 0, lastSplat = 0, prevContacts = 0, clearAt = 0, lastPurun = 0, plopped = false;
 const PROG = () => { const p = lsGet('kj_prog') || { best: {} }; p.best = p.best || {}; p.open = 30; return p; };
 function saveBest(i, ms) { const p = PROG(); if (!p.best[i] || ms < p.best[i]) p.best[i] = ms; p.open = Math.max(p.open, Math.min(30, i + 2)); lsSet('kj_prog', p); }
+const clearedN = () => { const p = PROG(); let n = 0; for (let i = 0; i < 30; i++) if (p.best[i]) n++; return n; };
+const useGold = () => clearedN() >= 30 && lsGet('kj_gold') !== false;
+function updGold() {
+  const b = $('#goldBtn'), n = clearedN();
+  if (n >= 30) { b.hidden = false; b.textContent = useGold() ? tr('goldOn') : tr('goldOff'); $('#titleNote').textContent = ''; }
+  else { b.hidden = true; $('#titleNote').textContent = n ? tr('goldLock', { n }) : ''; }
+}
 const showPanel = id => ['#title', '#selectP', '#clearP'].forEach(p => $(p).hidden = p !== id);
 function bigMsg(t, sub = '', cls = '', dur = 1.2) { $('#msgBig').textContent = t; $('#msgBig').className = cls; $('#msgSub').textContent = sub; $('#msg').hidden = !t; msgT = dur; }
 const fmt = ms => (ms / 1000).toFixed(2);
@@ -549,15 +644,27 @@ const guard = fn => (...a) => { const n = performance.now(); if (n < tapLock) re
 
 function startStage(i) {
   cur = clamp(i, 0, STAGES.length - 1); mode = 'play'; hold = false; acc = 0;
-  G = SIM.newGame(STAGES[cur]); jelly.reset(); buildStage(STAGES[cur]); fitCam();
+  G = SIM.newGame(STAGES[cur]); jelly.reset(); CAM.z = 0; CAM.follow = false; REC.cancel(); kon.m.material = useGold() ? goldM : konM; buildStage(STAGES[cur]); fitCam();
   showPanel(null); $('#hud').hidden = false; $('#hint').hidden = false; prevContacts = 0;
   $('#stName').textContent = stName(cur); $('#stNo').textContent = tr('stageN', { n: cur + 1 });
-  updHud(); chop.userData.t = 0;
+  updHud(); chop.userData.t = 0; showTop(cur);
   const ghost = STAGES[cur].objs.some(o => o.vis === 'ghost');
   bigMsg(String(cur + 1), stName(cur) + (ghost ? ' ・ ' + tr('ghost') : cur === 0 ? ' ・ ' + tr('still') : ''), 'good', cur === 0 ? 2.4 : 1.4);
 }
+const TOPC = {};
+async function showTop(i) {
+  const el = $('#stTop'), p = PROG(), mine = p.best[i];
+  const put = t => { if (cur !== i) return; el.textContent = (t ? tr('top1', { t: fmt(t.s) }) : tr('top1none')) + (mine ? ' ・ ' + tr('mine', { t: fmt(mine) }) : ''); };
+  el.textContent = mine ? tr('mine', { t: fmt(mine) }) : '';
+  const c = TOPC[i]; if (c && Date.now() - c.at < 60000) { put(c.v); return; }
+  try {
+    const [d, hd] = await Promise.all([fbGet('konnyaku/st/' + (i + 1), '?orderBy=%22s%22&limitToFirst=8'), fbGet('konnyaku/hidden').catch(() => null)]);
+    const list = Object.entries(d || {}).filter(([u, v]) => !(hd && hd[u]) && v && typeof v.s === 'number').map(([u, v]) => v).sort((a, b) => a.s - b.s);
+    TOPC[i] = { at: Date.now(), v: list[0] || null }; put(list[0] || null);
+  } catch (_) { }
+}
 function updHud() { $('#tNow').textContent = fmt(G ? G.t * 1000 : 0); $('#tFail').textContent = tr('fails', { n: G ? G.fails : 0 }); }
-function toTitle() { mode = 'title'; G = null; $('#upMark').hidden = true; $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; showPanel('#title'); }
+function toTitle() { updGold(); mode = 'title'; G = null; $('#upMark').hidden = true; $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; showPanel('#title'); }
 function openSelect() {
   mode = 'select'; $('#upMark').hidden = true; $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; showPanel('#selectP');
   const p = PROG(), grid = $('#grid'); grid.innerHTML = '';
@@ -572,9 +679,11 @@ function openSelect() {
 }
 $('#goPlay').onclick = guard(() => { const p = PROG(); let i = 0; while (i < 29 && p.best[i]) i++; startStage(i); });
 $('#goSelect').onclick = guard(openSelect);
+$('#goldBtn').onclick = guard(() => { lsSet('kj_gold', !useGold()); updGold(); });
 $('#selBack').onclick = guard(toTitle);
-$('#backBtn').onclick = guard(openSelect);
-$('#clMenu').onclick = guard(openSelect);
+$('#backBtn').onclick = guard(() => { REC.cancel(); openSelect(); });
+$('#redoBtn').onclick = guard(() => { if (mode !== 'play' || !G) return; SIM.respawn(G); jelly.reset(); chop.userData.t = 0; CAM.follow = false; REC.cancel(); hold = false; updHud(); });
+$('#clMenu').onclick = guard(() => { REC.cancel(); openSelect(); });
 $('#clRetry').onclick = guard(() => startStage(cur));
 $('#clNext').onclick = guard(() => { if (cur < 29) startStage(cur + 1); else openSelect(); });
 
@@ -592,14 +701,18 @@ document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastT
 function onClear() {
   mode = 'clear'; const ms = Math.round(G.t * 1000), f = G.fails; clearAt = performance.now();
   SND.clear(); buzz([30, 40, 60]); flash();
-  bigMsg(tr('landed'), '', 'good', 1.6);
-  const p = PROG(), prevBest = p.best[cur]; saveBest(cur, ms);
+  const p = PROG(), prevBest = p.best[cur], wasN = clearedN(); saveBest(cur, ms); delete TOPC[cur];
+  const goldNow = wasN < 30 && clearedN() >= 30;
+  if (goldNow) { lsSet('kj_gold', true); kon.m.material = goldM; }
+  REC.finish(ms);
+  bigMsg(tr('landed'), goldNow ? tr('goldGet') : '', 'good', goldNow ? 2.4 : 1.6);
   last = { st: cur, ms, f, best: !prevBest || ms < prevBest };
   setTimeout(() => {
     if (mode !== 'clear') return;
     $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; $('#upMark').hidden = true;
     $('#clName').textContent = `${cur + 1}. ${stName(cur)}`; $('#clTime').innerHTML = `${fmt(ms)}<small>${esc(tr('sec'))}</small>`;
-    $('#clSub').textContent = tr('clSub', { f }) + (cur === 29 ? ' ・ ' + tr('allClear') : '');
+    $('#clSub').textContent = tr('clSub', { f }) + (goldNow ? ' ・ ' + tr('goldGet') : cur === 29 ? ' ・ ' + tr('allClear') : '');
+    $('#clVid').hidden = !REC.ready(); $('#clVid').disabled = false; $('#clVid').textContent = REC.ready() ? tr('vid') : tr('vidMaking'); REC.onready = () => { if (mode === 'clear') { $('#clVid').hidden = false; $('#clVid').textContent = tr('vid'); } };
     $('#nameIn').value = lsGet('kj_name') || ''; $('#send').disabled = false; $('#sendMsg').textContent = ''; $('#sendMsg').className = 'note';
     $('#clNext').textContent = cur < 29 ? tr('next') : tr('menu');
     showPanel('#clearP'); loadRank(cur);
@@ -671,9 +784,14 @@ function stepAll(dt, draw = true) {
     acc += dt; let n = 0;
     while (acc >= SIM.DT - 1e-9 && n < 24) {
       const wasMode = G.pan.mode;
+      const pcy = G.cy, pq = jelly.qv;
       const r = SIM.stepGame(G, hold); acc -= SIM.DT; n++; jelly.step(G, r);
-      if (wasMode === 'wind' && G.pan.mode === 'up') { SND.flip(G.pan.lastPower || 0); buzz(15); }
-      if (r === 'fail') { SND.plop(); buzz([20, 30, 20]); bigMsg(tr('plop'), tr('plopSub'), 'bad', 1.0); chop.userData.t = 0; }
+      if (wasMode === 'wind' && G.pan.mode === 'up') { SND.flip(G.pan.lastPower || 0); buzz(15); REC.start(); }
+      // ぷるん：揺れが折り返すたびに
+      if (pq * jelly.qv < 0 && Math.abs(jelly.q) > .07 && G.t - lastPurun > .16) { SND.purun(Math.min(1, Math.abs(jelly.q) / .5)); lastPurun = G.t; }
+      // 鍋に入った瞬間のしぶき
+      if (r !== 'fail' && pcy > -2.2 && G.cy <= -2.2) { splash(G.cx, G.vmax); SND.plop(); plopped = true; }
+      if (r === 'fail') { if (!plopped) SND.plop(); plopped = false; buzz([20, 30, 20]); bigMsg(tr('plop'), tr('plopSub'), 'bad', 1.0); chop.userData.t = 0; CAM.follow = false; REC.cancel(); }
       if (r === 'clear') { onClear(); break; }
       // 着地した瞬間の音
       const c = G.contacts + (G.onPan ? 1 : 0);
@@ -686,6 +804,15 @@ function stepAll(dt, draw = true) {
     $('#hintT').textContent = hold ? tr('hintHold') : tr('hintIdle');
     $('#hint').hidden = G.pan.mode === 'up';
   }
+  // カメラ：飛んだら寄る・台やフライ返しの上では全体を見せる
+  if (G) {
+    if (G.pan.mode === 'up' && !CAM.follow) { CAM.follow = true; CAM.ft = 0; }
+    if (CAM.follow) { CAM.ft += dt; if (G.onPan > 0 && G.vmax < 1.5 && CAM.ft > .6) CAM.follow = false; }
+    const zt = CAM.follow && CAM.ft > .12 ? 1 : 0; CAM.z += (zt - CAM.z) * Math.min(1, dt * (zt ? 2.2 : 3.5));
+    CAM.fx += (G.cx - CAM.fx) * Math.min(1, dt * 5); CAM.fy += (G.cy - CAM.fy) * Math.min(1, dt * 5);
+    fitCam();
+  }
+  stepFx(dt);
   // こんにゃく・道具・物を動かす
   if (G) {
     kon.update(G.k.P); kon.m.visible = true;
@@ -705,17 +832,17 @@ function stepAll(dt, draw = true) {
   for (const grp of windFx) { const w = grp.userData.w, L = Math.hypot(w.fx, w.fy) || 1; grp.children.forEach(l => { l.userData.u = (l.userData.u + dt * .5) % 1; const u = w.fx >= 0 ? l.userData.u : 1 - l.userData.u; l.position.set(w.fx ? w.x0 + (w.x1 - w.x0) * u : w.x0 + (w.x1 - w.x0) * l.userData.v, w.fy ? Math.min(w.y1, 8) * u + w.y0 * (1 - u) : w.y0 + (Math.min(w.y1, 8) - w.y0) * l.userData.v, -.6); l.rotation.z = Math.atan2(w.fy, w.fx); l.material.opacity = .5 * Math.sin(u * Math.PI); }); }
   // 湯気
   for (const s of steam) { const u = ((tAll * .25 + s.userData.ph) % 1); s.position.set(s.userData.x + Math.sin(tAll + s.userData.ph) * .3, -2.1 + u * 1.6, .9); s.scale.setScalar(.4 + u * .9); s.material.opacity = .22 * (1 - u) * Math.min(1, u * 5); }
-  if (draw) renderer.render(scene, camera);
+  if (draw) { renderer.render(scene, camera); REC.draw(); }
 }
 
 /* ===================== 始める ===================== */
 addEventListener('resize', resize);
-resize(); applyLang();
+resize(); applyLang(); updGold();
 $('#loading').remove();
 const qst = parseInt(QS.get('st'), 10);
 if (qst >= 1 && qst <= 30) startStage(qst - 1); else showPanel('#title');
 requestAnimationFrame(frame);
-window.__kj = { get G() { return G; }, get mode() { return mode; }, startStage, setHold(h) { hold = h; }, SIM, SND, STAGES, manual(v) { MANUAL = v; }, tick(dt, draw = true) { stepAll(dt, draw); }, run(n) { for (let i = 0; i < n; i++) stepAll(SIM.DT, i === n - 1); }, toScreen, camera };
+window.__kj = { get G() { return G; }, get mode() { return mode; }, startStage, setHold(h) { hold = h; }, SIM, SND, STAGES, manual(v) { MANUAL = v; }, tick(dt, draw = true) { stepAll(dt, draw); }, run(n) { for (let i = 0; i < n; i++) stepAll(SIM.DT, i === n - 1); }, toScreen, camera, REC, splash };
 </script>
 </body>
 </html>

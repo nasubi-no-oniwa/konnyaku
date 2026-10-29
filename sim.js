@@ -104,6 +104,8 @@ export function newGame(stage, seed = 1) {
   return g;
 }
 function spawn(g) { g.k = makeKonnyaku(PAN.x - .2, PAN.y + 2.6, PAN.a + .1); g.state = 'drop'; g.still = 0; g.offT = 0; }
+// やり直し（ぽちゃん1回として数える。時計は止めない）
+export function respawn(g) { if (g.clear) return; g.fails++; g.lastFail = g.t; spawn(g); }
 
 // 入力：hold（押しているか）
 export function stepGame(g, hold) {
