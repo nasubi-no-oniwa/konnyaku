@@ -354,6 +354,30 @@ const konTex = canvasTex(256, 96, (c, w, h) => {
 });
 const konM = new THREE.MeshStandardMaterial({ map: konTex, color: 0xdde3ea, roughness: .2, metalness: 0 });
 const KZ = .3;
+// 見た目だけのぶるんぶるん：こんにゃくの中心の加速度でゆらす（当たり判定・クリア判定は変えない）
+const jelly = {
+  q: 0, qv: 0, s: 0, sv: 0, r: 0, rv: 0, pv: null, pc: null, pa: null, pw: 0,
+  reset() { this.q = this.qv = this.s = this.sv = this.r = this.rv = 0; this.pv = this.pc = this.pa = null; },
+  step(g, res) {
+    const P = g.k.P, D = SIM.DT; let cx = 0, cy = 0; for (const p of P) { cx += p.x; cy += p.y; } cx /= P.length; cy /= P.length;
+    const NX = SIM.NX, NY = SIM.NY; let lx = 0, ly = 0, rx = 0, ry = 0;
+    for (let j = 0; j < NY; j++) { lx += P[j * NX].x; ly += P[j * NX].y; rx += P[j * NX + NX - 1].x; ry += P[j * NX + NX - 1].y; }
+    const ang = Math.atan2(ry - ly, rx - lx);
+    if (res === 'fail' || !this.pc) { this.reset(); this.pc = [cx, cy]; this.pa = ang; return; }
+    const vx = (cx - this.pc[0]) / D, vy = (cy - this.pc[1]) / D; let w = ang - this.pa; w = Math.atan2(Math.sin(w), Math.cos(w)); w /= D;
+    this.pc = [cx, cy]; this.pa = ang;
+    if (!this.pv) { this.pv = [vx, vy]; this.pw = w; return; }
+    let ax = (vx - this.pv[0]) / D, ay = (vy - this.pv[1]) / D, aw = (w - this.pw) / D; this.pv = [vx, vy]; this.pw = w;
+    const lim = 900; ax = clamp(ax, -lim, lim); ay = clamp(ay, -lim, lim); aw = clamp(aw, -6000, 6000);
+    const nx = -Math.sin(ang), ny = Math.cos(ang), an = ax * nx + ay * ny, at = ax * Math.cos(ang) + ay * Math.sin(ang);
+    // 曲がる揺れ（両はしが上下に）・つぶれる揺れ・ねじれ（左右のはしが逆に）
+    const W1 = 2 * Math.PI * 3.0, W2 = 2 * Math.PI * 4.2, W3 = 2 * Math.PI * 3.6;
+    this.qv += (-W1 * W1 * this.q - 2 * .045 * W1 * this.qv - an * 1.25) * D; this.q += this.qv * D;
+    this.sv += (-W2 * W2 * this.s - 2 * .06 * W2 * this.sv - an * 1.9 + Math.abs(at) * .25) * D; this.s += this.sv * D;
+    this.rv += (-W3 * W3 * this.r - 2 * .06 * W3 * this.rv - aw * .016) * D; this.r += this.rv * D;
+    this.q = clamp(this.q, -.42, .42); this.s = clamp(this.s, -.45, .45); this.r = clamp(this.r, -.35, .35);
+  },
+};
 const kon = (() => {
   const NX = SIM.NX, NY = SIM.NY, n = NX * NY;
   const pos = new Float32Array(n * 2 * 3 + (2 * (NX - 1) + 2 * (NY - 1)) * 4 * 3 + 64 * 3);
@@ -388,6 +412,15 @@ const kon = (() => {
       const tx = b.x - a.x, ty = b.y - a.y, L = Math.hypot(tx, ty) || 1, q = Q[ring[k]];
       q.x += ty / L * SIM.PR; q.y += -tx / L * SIM.PR;
     }
+    // ゆれを足す
+    { let cx = 0, cy = 0; for (const p of Q) { cx += p.x; cy += p.y; } cx /= n; cy /= n;
+      const a = P0[NX - 1], b = P0[0], m = P0[(NY - 1) * NX + NX - 1], c = P0[(NY - 1) * NX];
+      const ang = Math.atan2((a.y + m.y) - (b.y + c.y), (a.x + m.x) - (b.x + c.x)), ex = Math.cos(ang), ey = Math.sin(ang), nx = -ey, ny = ex, half = SIM.KW / 2 + SIM.PR;
+      for (const q of Q) {
+        const rx = q.x - cx, ry = q.y - cy, u = clamp((rx * ex + ry * ey) / half, -1.2, 1.2), v = rx * nx + ry * ny;
+        const dn = jelly.q * (u * u - .33) + v * jelly.s + jelly.r * u * .5 * Math.abs(u), de = -(u * half) * jelly.s * .35;
+        q.x += nx * dn + ex * de; q.y += ny * dn + ey * de;
+      } }
     const P = Q;
     for (let k = 0; k < n; k++) { const p = P[k]; pos[k * 3] = p.x; pos[k * 3 + 1] = p.y; pos[k * 3 + 2] = KZ; pos[(n + k) * 3] = p.x; pos[(n + k) * 3 + 1] = p.y; pos[(n + k) * 3 + 2] = -KZ; }
     for (const [a, b, s] of sides) {
@@ -511,7 +544,7 @@ const guard = fn => (...a) => { const n = performance.now(); if (n < tapLock) re
 
 function startStage(i) {
   cur = clamp(i, 0, STAGES.length - 1); mode = 'play'; hold = false; acc = 0;
-  G = SIM.newGame(STAGES[cur]); buildStage(STAGES[cur]); fitCam();
+  G = SIM.newGame(STAGES[cur]); jelly.reset(); buildStage(STAGES[cur]); fitCam();
   showPanel(null); $('#hud').hidden = false; $('#hint').hidden = false; prevContacts = 0;
   $('#stName').textContent = stName(cur); $('#stNo').textContent = tr('stageN', { n: cur + 1 });
   updHud(); chop.userData.t = 0;
@@ -633,7 +666,7 @@ function stepAll(dt, draw = true) {
     acc += dt; let n = 0;
     while (acc >= SIM.DT - 1e-9 && n < 24) {
       const wasMode = G.pan.mode;
-      const r = SIM.stepGame(G, hold); acc -= SIM.DT; n++;
+      const r = SIM.stepGame(G, hold); acc -= SIM.DT; n++; jelly.step(G, r);
       if (wasMode === 'wind' && G.pan.mode === 'up') { SND.flip(G.pan.lastPower || 0); buzz(15); }
       if (r === 'fail') { SND.plop(); buzz([20, 30, 20]); bigMsg(tr('plop'), tr('plopSub'), 'bad', 1.0); chop.userData.t = 0; }
       if (r === 'clear') { onClear(); break; }
@@ -659,7 +692,7 @@ function stepAll(dt, draw = true) {
     chop.visible = ct < 1.4; chop.position.set(SIM.PAN.x - .2, SIM.PAN.y + 2.7 + Math.max(0, ct - .5) * 3, .4);
     const open = Math.min(1, ct * 3); chop.userData[-1].rotation.z = -.05 - open * .25; chop.userData[1].rotation.z = .05 + open * .25;
     // 2秒の輪
-    if (mode === 'play' && G.still > .05) { const s = toScreen(G.cx, G.cy + .6); const r = $('#stillRing'); r.hidden = false; r.style.left = s.x + 'px'; r.style.top = s.y + 'px'; r.style.setProperty('--p', Math.min(1, G.still / SIM.STILL_NEED).toFixed(3)); }
+    if (mode === 'play' && G.still > .05) { const s = toScreen(G.cx, G.cy + 1.0); const r = $('#stillRing'); r.hidden = false; r.style.left = s.x + 'px'; r.style.top = s.y + 'px'; r.style.setProperty('--p', Math.min(1, G.still / SIM.STILL_NEED).toFixed(3)); }
     else if (mode === 'play') $('#stillRing').hidden = true;
     { const s = toScreen(G.cx, G.cy), um = $('#upMark'), off = mode === 'play' && s.y < 70; um.hidden = !off; if (off) um.style.left = clamp(s.x, 20, VW - 20) + 'px'; }
   } else kon.m.visible = false;
