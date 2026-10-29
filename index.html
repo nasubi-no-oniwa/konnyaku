@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5RB6XMN0QR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-5RB6XMN0QR');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#3b2a1a">
+<meta name="description" content="おでんの鍋から逃げたこんにゃくを、フライ返しで弾いて、変なところに乗せろ。全30面、面ごとのクリア時間ランキング。">
+<meta property="og:title" content="とんで、こんにゃく">
+<meta property="og:description" content="おでんから逃げたこんにゃくを、変なところに乗せろ。">
+<meta property="og:image" content="https://nasubi-no-oniwa.github.io/konnyaku/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>とんで、こんにゃく</title>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<style>
+/* おでん屋ののれん：こげ茶と生成り、からしの黄色 */
+:root{
+  --ink:#2b1d12;
+  --brown:#3b2a1a;
+  --noren:#24324a;
+  --cream:#f7efdc;
+  --karashi:#f2b705;
+  --red:#d6452f;
+  --disp:"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Noto Sans JP",sans-serif;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#f3dfb8;color:var(--ink);overflow:hidden;font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+html,body,button,input,#app,.overlay,.card,#hud{touch-action:manipulation}
+[hidden]{display:none!important}
+#app{position:fixed;inset:0}
+#c{width:100%;height:100%;display:block;touch-action:none}
+button{font-family:var(--body)}
+button:focus-visible{outline:3px solid var(--karashi);outline-offset:2px}
+
+#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 0;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+#hud>*{pointer-events:auto}
+.chip{background:rgba(43,29,18,.88);color:var(--cream);border-radius:10px;padding:6px 11px;font-weight:900;font-size:13px;border:0;line-height:1.25}
+button.chip{cursor:pointer}
+#stInfo{flex:1;min-width:0;text-align:center}
+#stInfo b{display:block;font-family:var(--disp);font-weight:400;font-size:16px;color:var(--karashi);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stInfo span{font-size:11px;opacity:.85}
+#timeBox{text-align:right;min-width:86px}
+#timeBox b{display:block;font-family:var(--disp);font-weight:400;font-size:20px;font-variant-numeric:tabular-nums;color:var(--cream)}
+#timeBox span{font-size:11px;opacity:.85}
+#msg{position:absolute;left:0;right:0;top:28%;text-align:center;pointer-events:none;padding:0 16px}
+#msgBig{font-family:var(--disp);font-size:clamp(40px,13vw,68px);line-height:1.05;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
+#msgBig.good{color:var(--karashi)}
+#msgBig.bad{color:#9fc6e8}
+#msgSub{margin-top:8px;font-weight:900;font-size:15px;color:#fff;text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.6)}
+#hint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 18px);display:flex;align-items:center;gap:8px;background:rgba(43,29,18,.88);color:var(--cream);font-weight:900;font-size:15px;padding:10px 16px;border-radius:999px;border:2px solid var(--karashi);pointer-events:none;white-space:nowrap;max-width:94%}
+#hint.hold{background:var(--karashi);color:var(--ink)}
+#hint .hand{font-size:20px}
+#gBar{display:none;width:90px;height:12px;border-radius:6px;background:rgba(43,29,18,.25);overflow:hidden}
+#hint.hold #gBar{display:block}
+#gFill{display:block;height:100%;width:0;background:var(--red)}
+#stillRing{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;pointer-events:none;border-radius:50%;background:conic-gradient(var(--karashi) calc(var(--p) * 1turn),rgba(255,255,255,.35) 0);-webkit-mask:radial-gradient(circle,transparent 22px,#000 23px);mask:radial-gradient(circle,transparent 22px,#000 23px)}
+#upMark{position:absolute;top:calc(env(safe-area-inset-top,0px) + 78px);margin-left:-14px;width:28px;height:28px;border-radius:50%;background:rgba(43,29,18,.85);color:var(--karashi);display:grid;place-items:center;font-size:14px;pointer-events:none}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .4s}
+
+.overlay{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr);place-items:safe center;background:rgba(43,29,18,.45);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 18px);overflow-y:auto}
+.card{position:relative;width:min(100%,400px);background:var(--cream);border-radius:16px;padding:22px 18px 18px;text-align:center;box-shadow:0 0 0 4px var(--brown),0 18px 40px rgba(0,0,0,.4)}
+.noren{position:absolute;left:14px;right:14px;top:-4px;height:30px;display:flex;gap:4px;justify-content:center}
+.noren i{flex:1;background:var(--noren);border-radius:0 0 6px 6px}
+.card h1{font-family:var(--disp);font-weight:400;font-size:clamp(36px,11.5vw,50px);line-height:1.1;margin:30px 0 0;color:var(--ink)}
+.card h1 em{font-style:normal;color:var(--red)}
+.sub{font-weight:900;font-size:14px;margin:10px 0 0}
+.card h2{font-family:var(--disp);font-weight:400;font-size:24px;margin:24px 0 0;line-height:1.25}
+.big{display:block;width:100%;margin-top:12px;font-family:var(--disp);font-size:clamp(18px,5.6vw,22px);background:var(--red);color:#fff;border:0;border-radius:12px;padding:12px 14px 13px;cursor:pointer;box-shadow:0 4px 0 #8e2a1b;white-space:nowrap}
+.big.k{background:var(--karashi);color:var(--ink);box-shadow:0 4px 0 #9b7400}
+.big.alt{background:transparent;color:var(--ink);border:2px solid var(--brown);box-shadow:none;font-size:16px;padding:9px}
+.big.x{background:#000;color:#fff;box-shadow:0 4px 0 #444;font-size:17px}
+.big:disabled{opacity:.5;cursor:default}
+.row2{display:flex;gap:8px}.row2 .big{flex:1}
+.langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:16px}
+.langs button{font:700 13px var(--body);background:transparent;color:var(--ink);border:1.5px solid rgba(43,29,18,.45);border-radius:999px;padding:4px 11px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--brown);color:var(--cream);border-color:var(--brown)}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:14px}
+.grid button{aspect-ratio:1;border:0;border-radius:10px;background:#fff;box-shadow:0 2px 0 rgba(43,29,18,.35);cursor:pointer;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--ink)}
+.grid button b{font-family:var(--disp);font-weight:400;font-size:20px;line-height:1}
+.grid button small{font-size:10px;font-weight:900;font-variant-numeric:tabular-nums;color:#7a5a3a}
+.grid button.done{background:#fff4cf}
+.grid button.lock{background:#d9cdb6;color:#8d7d64;cursor:default}
+.res-big{font-family:var(--disp);font-size:clamp(40px,13vw,56px);line-height:1.05;margin:26px 0 0;color:var(--red)}
+.res-time{font-family:var(--disp);font-size:48px;font-variant-numeric:tabular-nums;line-height:1;margin-top:6px}
+.res-time small{font-family:var(--body);font-weight:900;font-size:16px;margin-left:4px}
+.note{margin:8px 0 0;font-weight:700;font-size:13px;min-height:1.2em}
+.note.err{color:var(--red)}
+.entry{display:flex;gap:8px;margin-top:12px}
+.entry input{flex:1;min-width:0;font:700 16px var(--body);padding:10px 12px;border-radius:10px;border:2px solid var(--brown);background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text}
+.entry button{font:900 15px var(--body);background:var(--brown);color:var(--cream);border:0;border-radius:10px;padding:0 14px;cursor:pointer;white-space:nowrap}
+.entry button:disabled{opacity:.5}
+.rlist{list-style:none;margin:10px 0 0;padding:0;max-height:min(40vh,320px);overflow-y:auto;text-align:left;border-top:2px solid var(--brown)}
+.rlist li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 2px;border-bottom:1px solid rgba(43,29,18,.2)}
+.rlist .no{font-family:var(--disp);text-align:center;color:var(--red)}
+.rlist .nm{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rlist .sc{font-family:var(--disp);font-size:16px;font-variant-numeric:tabular-nums}
+.rlist .me .nm{color:var(--red)}
+.rempty{padding:14px 0;font-weight:700;text-align:center;display:block!important}
+#loading{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;background:#f3dfb8}
+@media (prefers-reduced-motion:reduce){#flash{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+  <div id="flash"></div>
+  <div id="stillRing" hidden></div>
+  <div id="upMark" hidden>▲</div>
+  <div id="hud" hidden>
+    <button class="chip" id="backBtn" data-i="menu">面えらび</button>
+    <div class="chip" id="stInfo"><b id="stName"></b><span id="stNo"></span></div>
+    <div class="chip" id="timeBox"><b id="tNow">0.00</b><span id="tFail"></span></div>
+  </div>
+  <div id="msg" hidden><div id="msgBig"></div><div id="msgSub"></div></div>
+  <div id="hint" hidden><span class="hand">👆</span><span id="hintT"></span><span id="gBar"><i id="gFill"></i></span></div>
+
+  <!-- タイトル -->
+  <div class="overlay" id="title">
+    <div class="card">
+      <div class="noren"><i></i><i></i><i></i><i></i><i></i></div>
+      <h1 data-ih="titleH">とんで、<br><em>こんにゃく</em></h1>
+      <p class="sub" data-i="sub">おでんの鍋から逃げたこんにゃくを、変なところに乗せろ。</p>
+      <button class="big" id="goPlay" data-i="play">はじめる</button>
+      <button class="big k" id="goSelect" data-i="select">面をえらぶ</button>
+      <p class="note" id="titleNote"></p>
+      <div class="langs" role="group" aria-label="Language"><button data-lang="ja">日本語</button><button data-lang="en">English</button><button data-lang="zh">繁中</button><button data-lang="ko">한국어</button></div>
+    </div>
+  </div>
+
+  <!-- 面えらび -->
+  <div class="overlay" id="selectP" hidden>
+    <div class="card">
+      <div class="noren"><i></i><i></i><i></i><i></i><i></i></div>
+      <h2 data-i="select">面をえらぶ</h2>
+      <div class="grid" id="grid"></div>
+      <button class="big alt" id="selBack" data-i="toTitle">タイトルへ</button>
+    </div>
+  </div>
+
+  <!-- クリア -->
+  <div class="overlay" id="clearP" hidden>
+    <div class="card">
+      <div class="noren"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="res-big" data-i="landed">着地！</p>
+      <p class="sub" id="clName"></p>
+      <div class="res-time" id="clTime"></div>
+      <p class="note" id="clSub"></p>
+      <div class="entry"><input id="nameIn" maxlength="12" data-ip="namePh" placeholder="名前（12文字まで）" autocomplete="nickname"><button id="send" data-i="send">登録</button></div>
+      <p class="note" id="sendMsg"></p>
+      <ol class="rlist" id="rlist"></ol>
+      <button class="big" id="clNext" data-i="next">次の面へ</button>
+      <div class="row2"><button class="big alt" id="clRetry" data-i="retry">もう一回</button><button class="big alt" id="clMenu" data-i="menu">面えらび</button></div>
+      <button class="big x" id="clShare" data-i="share">Xに投稿</button>
+    </div>
+  </div>
+
+  <div id="loading">…</div>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as SIM from './sim.js';
+import { STAGES } from './stages.js';
+
+const $ = s => document.querySelector(s);
+function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { } }
+const QS = new URLSearchParams(location.search);
+const GAME_URL = 'https://nasubi-no-oniwa.github.io/konnyaku/';
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ===================== ことば ===================== */
+const TX = {
+  ja: {
+    title: 'とんで、こんにゃく', titleH: 'とんで、<br><em>こんにゃく</em>', sub: 'おでんの鍋から逃げたこんにゃくを、変なところに乗せろ。',
+    play: 'はじめる', select: '面をえらぶ', toTitle: 'タイトルへ', menu: '面えらび', stageN: '{n}面 / 30',
+    hintIdle: '長押しでためて、はなして弾く', hintHold: 'はなすと弾く！', fails: 'ぽちゃん {n}回',
+    landed: '着地！', plop: 'ぽちゃん', plopSub: 'おでんの鍋にもどった…', still: '2秒乗せたら着地',
+    sec: '秒', clSub: 'ぽちゃん {f}回', namePh: '名前（12文字まで）', send: '登録', needName: '名前を入れてね', badName: 'その名前は使えません',
+    sending: '登録中…', sent: '登録しました', notBest: '自己ベストではないので登録しませんでした', sendFail: '登録できませんでした',
+    next: '次の面へ', retry: 'もう一回', share: 'Xに投稿', allClear: '全30面クリア！',
+    rLoading: '読みこみ中…', rEmpty: 'まだだれもいません。1位になれる', rFail: 'つながりませんでした',
+    shareT: 'こんにゃくを「{name}」に{t}秒で着地させた（{n}面）', locked: 'まだ', wind: '風', ghost: '見えない壁がある…',
+    tags: '#とんでこんにゃく',
+  },
+  en: {
+    title: 'Flying Konnyaku', titleH: 'Flying<br><em>Konnyaku</em>', sub: 'A konnyaku escaped the oden pot. Land it on weird things.',
+    play: 'Play', select: 'Stages', toTitle: 'Title', menu: 'Stages', stageN: 'Stage {n} / 30',
+    hintIdle: 'Hold to charge, let go to flip', hintHold: 'Let go to flip!', fails: 'Splash ×{n}',
+    landed: 'Landed!', plop: 'Splash', plopSub: 'Back into the oden pot…', still: 'Stay on it for 2 seconds',
+    sec: 's', clSub: 'Splash ×{f}', namePh: 'Name (up to 12)', send: 'Submit', needName: 'Enter a name', badName: "That name can't be used",
+    sending: 'Submitting…', sent: 'Submitted', notBest: 'Not your best, so it was not submitted', sendFail: "Couldn't submit",
+    next: 'Next stage', retry: 'Again', share: 'Post to X', allClear: 'All 30 stages cleared!',
+    rLoading: 'Loading…', rEmpty: 'Nobody yet. You can be #1', rFail: "Couldn't connect",
+    shareT: 'I landed a konnyaku on "{name}" in {t}s (stage {n})', locked: '—', wind: 'Wind', ghost: 'There is an invisible wall…',
+    tags: '#とんでこんにゃく',
+  },
+  zh: {
+    title: '飛吧，蒟蒻', titleH: '飛吧，<br><em>蒟蒻</em>', sub: '從關東煮鍋裡逃出來的蒟蒻，把它放到奇怪的地方。',
+    play: '開始', select: '選關', toTitle: '回標題', menu: '選關', stageN: '第{n}關 / 30',
+    hintIdle: '長按蓄力，放開彈出', hintHold: '放開就彈出！', fails: '噗通 {n}次',
+    landed: '著陸！', plop: '噗通', plopSub: '掉回關東煮鍋裡了…', still: '停在上面2秒就著陸',
+    sec: '秒', clSub: '噗通 {f}次', namePh: '名字（最多12字）', send: '登錄', needName: '請輸入名字', badName: '這個名字不能用',
+    sending: '登錄中…', sent: '已登錄', notBest: '不是自己的最佳紀錄，所以沒有登錄', sendFail: '無法登錄',
+    next: '下一關', retry: '再一次', share: '發到X', allClear: '全30關通關！',
+    rLoading: '讀取中…', rEmpty: '還沒有人。你可以拿第1', rFail: '無法連線',
+    shareT: '我用{t}秒讓蒟蒻降落在「{name}」上（第{n}關）', locked: '—', wind: '風', ghost: '有一道看不見的牆…',
+    tags: '#とんでこんにゃく',
+  },
+  ko: {
+    title: '날아라, 곤약', titleH: '날아라,<br><em>곤약</em>', sub: '오뎅 냄비에서 도망친 곤약을 이상한 곳에 올려라.',
+    play: '시작', select: '스테이지', toTitle: '타이틀로', menu: '스테이지', stageN: '{n}스테이지 / 30',
+    hintIdle: '길게 눌러 모으고, 떼서 튕기기', hintHold: '떼면 튕긴다!', fails: '퐁당 {n}번',
+    landed: '착지!', plop: '퐁당', plopSub: '오뎅 냄비로 돌아갔다…', still: '2초 올려두면 착지',
+    sec: '초', clSub: '퐁당 {f}번', namePh: '이름(12자까지)', send: '등록', needName: '이름을 넣어 줘', badName: '그 이름은 쓸 수 없어요',
+    sending: '등록 중…', sent: '등록했어요', notBest: '자기 최고 기록이 아니라서 등록하지 않았어요', sendFail: '등록하지 못했어요',
+    next: '다음 스테이지', retry: '한 번 더', share: 'X에 올리기', allClear: '30스테이지 전부 클리어!',
+    rLoading: '불러오는 중…', rEmpty: '아직 아무도 없어요. 1등이 될 수 있어', rFail: '연결하지 못했어요',
+    shareT: '곤약을 「{name}」에 {t}초 만에 착지시켰다 ({n}스테이지)', locked: '—', wind: '바람', ghost: '보이지 않는 벽이 있다…',
+    tags: '#とんでこんにゃく',
+  },
+};
+const LI = { ja: 0, en: 1, zh: 2, ko: 3 };
+function pickLang() {
+  const q = QS.get('lang'); if (q && TX[q]) { lsSet('kj_lang', q); return q; }
+  const s = lsGet('kj_lang'); if (s && TX[s]) return s;
+  const n = (navigator.language || 'ja').toLowerCase();
+  if (n.startsWith('ja')) return 'ja'; if (n.startsWith('ko')) return 'ko'; if (n.startsWith('zh')) return 'zh'; return 'en';
+}
+let LANG = pickLang();
+function tr(k, v) { let s = (TX[LANG] && TX[LANG][k]) ?? TX.ja[k] ?? k; if (v) for (const x in v) s = s.split('{' + x + '}').join(v[x]); return s; }
+const stName = i => STAGES[i].name[LI[LANG]] || STAGES[i].name[0];
+function applyLang() {
+  document.documentElement.lang = LANG === 'zh' ? 'zh-Hant' : LANG;
+  document.querySelectorAll('[data-i]').forEach(e => { e.textContent = tr(e.dataset.i); });
+  document.querySelectorAll('[data-ih]').forEach(e => { e.innerHTML = tr(e.dataset.ih); });
+  document.querySelectorAll('[data-ip]').forEach(e => { e.placeholder = tr(e.dataset.ip); });
+  document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === LANG));
+  document.title = tr('title');
+}
+document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG = b.dataset.lang; lsSet('kj_lang', LANG); applyLang(); });
+
+/* ===================== 音 ===================== */
+let ac = null;
+function audioOn() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); }
+function tone(f0, f1, dur, vol, type = 'sine', delay = 0) {
+  if (!ac) return; const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + delay;
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+}
+function noise(dur, f0, f1, vol, type = 'bandpass') {
+  if (!ac) return; const n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const s = ac.createBufferSource(); s.buffer = b; const f = ac.createBiquadFilter(); f.type = type; f.Q.value = 1;
+  const t = ac.currentTime; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  const g = ac.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  s.connect(f).connect(g).connect(ac.destination); s.start();
+}
+const SND = {
+  flip(p) { tone(180 + p * 220, 520 + p * 500, .18, .25, 'triangle'); noise(.12, 800, 2600, .2); },
+  boing() { tone(220, 90, .22, .2, 'sine'); tone(330, 140, .18, .08, 'triangle', .02); },
+  splat() { noise(.16, 1200, 300, .35); tone(140, 70, .12, .2); },
+  plop() { tone(600, 120, .25, .25, 'sine'); noise(.3, 2000, 400, .25); tone(900, 300, .15, .1, 'sine', .12); },
+  tick() { tone(1200, 1200, .04, .05, 'square'); },
+  clear() { [523, 659, 784, 1047].forEach((f, i) => tone(f, f, .22, .12, 'triangle', i * .09)); },
+  click() { tone(800, 600, .05, .06, 'square'); },
+};
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (_) { } };
+
+/* ===================== 描画 ===================== */
+const canvas = $('#c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, .5, 400);
+const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function canvasTex(w, h, draw, rep) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep[0], rep[1]); }
+  return t;
+}
+// 背景：夕方の空とのれん
+const BG = { lan: [] };
+{
+  const g = new THREE.PlaneGeometry(200, 120);
+  const tex = canvasTex(8, 256, (c, w, h) => { const gr = c.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#f6c98b'); gr.addColorStop(.55, '#f9e3bd'); gr.addColorStop(1, '#f3dfb8'); c.fillStyle = gr; c.fillRect(0, 0, w, h); });
+  const bg = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tex })); bg.position.set(5, 20, -30); scene.add(bg);
+  // 夕日とちょうちんのひも
+  const sunD = new THREE.Mesh(new THREE.CircleGeometry(3.2, 48), new THREE.MeshBasicMaterial({ color: 0xffd79a })); sunD.position.set(12, 6, -29); BG.sun = sunD;
+  const lanternM = new THREE.MeshStandardMaterial({ color: 0xe0503a, emissive: 0x7a1a10, roughness: .5 });
+  const capM = new THREE.MeshStandardMaterial({ color: 0x2b1d12 });
+  for (let i = 0; i < 9; i++) { const L = new THREE.Group(); const l = new THREE.Mesh(new THREE.SphereGeometry(.42, 16, 12), lanternM); l.scale.y = 1.3; L.add(l);
+    for (const s of [-1, 1]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.22, .22, .08, 12), capM); c.position.y = s * .55; L.add(c); }
+    L.userData.i = i; L.scale.setScalar(.8); BG.lan.push(L); scene.add(L); }
+  const rope = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, 40, 6), capM); rope.rotation.z = Math.PI / 2; scene.add(rope); BG.rope = rope;
+}
+scene.add(new THREE.HemisphereLight(0xfff3e0, 0x8a6a4a, 1.1));
+const sun = new THREE.DirectionalLight(0xffe9c8, 2.2);
+sun.position.set(-6, 14, 12); sun.target.position.set(5, 1, 0); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -10, right: 16, top: 12, bottom: -8, near: 1, far: 60 }); sun.shadow.bias = -.0004;
+scene.add(sun, sun.target);
+const mesh = (g, m) => { const o = new THREE.Mesh(g, m); o.castShadow = true; o.receiveShadow = true; return o; };
+
+// おでんの鍋（落ちたらここにもどる）
+const pot = new THREE.Group(); scene.add(pot);
+{
+  const potM = new THREE.MeshStandardMaterial({ color: 0xb9b2a6, roughness: .35, metalness: .7 });
+  const brothM = new THREE.MeshStandardMaterial({ color: 0xc8954a, roughness: .25 });
+  const body = mesh(new THREE.BoxGeometry(40, 2.4, 3), potM); body.position.set(5, -3.4, 0); pot.add(body);
+  const broth = mesh(new THREE.BoxGeometry(39.4, .1, 2.6), brothM); broth.position.set(5, -2.2, 0); pot.add(broth);
+  // 仕切りと具（だいこん・たまご・ちくわ）
+  const div = new THREE.MeshStandardMaterial({ color: 0x9a948a, roughness: .4, metalness: .6 });
+  for (let i = 0; i < 11; i++) { const d = mesh(new THREE.BoxGeometry(.08, .5, 2.6), div); d.position.set(-13.5 + i * 3.6, -2.05, 0); pot.add(d); }
+  const daikon = new THREE.MeshStandardMaterial({ color: 0xe8cf9a, roughness: .7 }), egg = new THREE.MeshStandardMaterial({ color: 0xa9733a, roughness: .5 }), chikuwa = new THREE.MeshStandardMaterial({ color: 0xc98a4a, roughness: .6 });
+  for (let i = 0; i < 16; i++) {
+    const x = -11.4 + i * 2.2, k = i % 3;
+    const o = k === 0 ? mesh(new THREE.CylinderGeometry(.55, .55, .5, 20), daikon) : k === 1 ? mesh(new THREE.SphereGeometry(.42, 16, 12), egg) : mesh(new THREE.CylinderGeometry(.25, .25, 1.3, 16), chikuwa);
+    if (k === 1) o.scale.set(1, .8, 1); if (k === 2) o.rotation.z = Math.PI / 2;
+    o.position.set(x, -2.05, (i % 2 ? .5 : -.4)); pot.add(o);
+  }
+}
+// 湯気
+const steam = [];
+{
+  const sm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .25, depthWrite: false });
+  for (let i = 0; i < 14; i++) { const s = new THREE.Mesh(new THREE.SphereGeometry(.4, 10, 8), sm.clone()); s.userData.ph = Math.random() * 6; s.userData.x = -4 + Math.random() * 18; scene.add(s); steam.push(s); }
+}
+
+// こんにゃく（点の位置に合わせて毎回形を作る板）
+const konTex = canvasTex(256, 96, (c, w, h) => {
+  c.fillStyle = '#9c9894'; c.fillRect(0, 0, w, h);
+  for (let i = 0; i < 700; i++) { c.fillStyle = `rgba(30,28,26,${.25 + Math.random() * .5})`; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, .8 + Math.random() * 1.4, 0, 6.3); c.fill(); }
+  // ちいさい顔
+  c.fillStyle = '#1b1a19'; c.beginPath(); c.arc(w * .44, h * .42, 5, 0, 6.3); c.arc(w * .56, h * .42, 5, 0, 6.3); c.fill();
+  c.strokeStyle = '#1b1a19'; c.lineWidth = 3; c.beginPath(); c.arc(w * .5, h * .55, 7, .3, Math.PI - .3); c.stroke();
+});
+const konM = new THREE.MeshStandardMaterial({ map: konTex, color: 0xdde3ea, roughness: .2, metalness: 0 });
+const KZ = .3;
+const kon = (() => {
+  const NX = SIM.NX, NY = SIM.NY, n = NX * NY;
+  const pos = new Float32Array(n * 2 * 3 + (2 * (NX - 1) + 2 * (NY - 1)) * 4 * 3 + 64 * 3);
+  const uv = new Float32Array(pos.length / 3 * 2), idx = [];
+  // 前と後ろ
+  for (let f = 0; f < 2; f++) for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) { const v = f * n + j * NX + i; uv[v * 2] = f ? 1 - i / (NX - 1) : i / (NX - 1); uv[v * 2 + 1] = j / (NY - 1); }
+  for (let f = 0; f < 2; f++) for (let j = 0; j < NY - 1; j++) for (let i = 0; i < NX - 1; i++) {
+    const a = f * n + j * NX + i, b = a + 1, c = a + NX, d = c + 1;
+    if (f === 0) idx.push(a, b, d, a, d, c); else idx.push(a, d, b, a, c, d);
+  }
+  // まわり（ふちの点を前後でつなぐ）
+  const ring = [];
+  for (let i = 0; i < NX; i++) ring.push(i);
+  for (let j = 1; j < NY; j++) ring.push(j * NX + NX - 1);
+  for (let i = NX - 2; i >= 0; i--) ring.push((NY - 1) * NX + i);
+  for (let j = NY - 2; j > 0; j--) ring.push(j * NX);
+  let base = 2 * n; const sides = [];
+  for (let k = 0; k < ring.length; k++) {
+    const a = ring[k], b = ring[(k + 1) % ring.length];
+    sides.push([a, b, base]); for (let q = 0; q < 4; q++) { uv[(base + q) * 2] = (q === 1 || q === 2) ? .1 : 0; uv[(base + q) * 2 + 1] = q < 2 ? 0 : .1; }
+    idx.push(base, base + 1, base + 3, base, base + 3, base + 2); base += 4;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.setIndex(idx);
+  const m = mesh(g, konM); m.frustumCulled = false; scene.add(m);
+  // 当たり判定は点の外側 PR まであるので、ふちの点を外へ PR だけ広げて描く
+  const Q = Array.from({ length: n }, () => ({ x: 0, y: 0 }));
+  function update(P0) {
+    for (let k = 0; k < n; k++) { Q[k].x = P0[k].x; Q[k].y = P0[k].y; }
+    for (let k = 0; k < ring.length; k++) {
+      const a = P0[ring[(k + ring.length - 1) % ring.length]], b = P0[ring[(k + 1) % ring.length]];
+      const tx = b.x - a.x, ty = b.y - a.y, L = Math.hypot(tx, ty) || 1, q = Q[ring[k]];
+      q.x += ty / L * SIM.PR; q.y += -tx / L * SIM.PR;
+    }
+    const P = Q;
+    for (let k = 0; k < n; k++) { const p = P[k]; pos[k * 3] = p.x; pos[k * 3 + 1] = p.y; pos[k * 3 + 2] = KZ; pos[(n + k) * 3] = p.x; pos[(n + k) * 3 + 1] = p.y; pos[(n + k) * 3 + 2] = -KZ; }
+    for (const [a, b, s] of sides) {
+      const A = P[a], B = P[b];
+      pos.set([A.x, A.y, KZ, B.x, B.y, KZ, A.x, A.y, -KZ, B.x, B.y, -KZ], s * 3);
+    }
+    g.attributes.position.needsUpdate = true; g.computeVertexNormals(); g.computeBoundingSphere();
+  }
+  return { m, update };
+})();
+
+// はじく道具（フライ返し）
+const panG = new THREE.Group(); scene.add(panG);
+{
+  const steel = new THREE.MeshStandardMaterial({ color: 0x2c2a28, roughness: .45, metalness: .1 });
+  const wood = new THREE.MeshStandardMaterial({ color: 0x8a5a33, roughness: .6 });
+  for (const p of SIM.PAN_PARTS) { const b = mesh(new THREE.BoxGeometry(p.w, p.h, 1.1), steel); b.position.set(p.x, p.y, 0); b.rotation.z = p.a || 0; panG.add(b); }
+  // 穴（フライ返しらしく）
+  const holeM = new THREE.MeshBasicMaterial({ color: 0x9a8f80 });
+  for (let i = 0; i < 4; i++) { const h = new THREE.Mesh(new THREE.BoxGeometry(.28, .01, .08), holeM); h.position.set(-.6 + i * .4, .002, .25); panG.add(h); }
+  // 柄（下の左へのびる）
+  const neck = mesh(new THREE.CylinderGeometry(.05, .05, 1.0, 10), steel); neck.position.set(-1.25, -.35, 0); neck.rotation.z = -1.0; panG.add(neck);
+  const grip = mesh(new THREE.CylinderGeometry(.11, .12, 1.6, 14), wood); grip.position.set(-2.3, -1.05, 0); grip.rotation.z = -1.0; panG.add(grip);
+}
+// 箸（こんにゃくを落とす）
+const chop = new THREE.Group(); scene.add(chop);
+{
+  const m = new THREE.MeshStandardMaterial({ color: 0xc0884a, roughness: .5 });
+  for (const s of [-1, 1]) { const c = mesh(new THREE.CylinderGeometry(.035, .05, 2.2, 8), m); c.position.set(s * .1, 1.1, 0); c.rotation.z = s * .05; chop.add(c); chop.userData[s] = c; }
+}
+
+// 面の物
+let objMeshes = [], windFx = [];
+const MAT = {};
+function matFor(o) {
+  const key = o.vis + o.col; if (MAT[key]) return MAT[key];
+  const rough = { metal: .25, balloon: .25, ball: .4, plate: .3, star: .35, moon: .4 }[o.vis] ?? .6;
+  const metal = o.vis === 'metal' ? .7 : 0;
+  return MAT[key] = new THREE.MeshStandardMaterial({ color: o.col, roughness: rough, metalness: metal });
+}
+function partMesh(p, m, depth) {
+  if (p.k === 'c') { const s = mesh(new THREE.SphereGeometry(p.r, 28, 20), m); s.position.set(p.x, p.y, 0); return s; }
+  if (p.k === 'b') { const b = mesh(new THREE.BoxGeometry(p.w, p.h, depth), m); b.position.set(p.x, p.y, 0); b.rotation.z = p.a || 0; return b; }
+  if (p.k === 's') {
+    const dx = p.x2 - p.x1, dy = p.y2 - p.y1, L = Math.hypot(dx, dy);
+    const c = mesh(new THREE.CapsuleGeometry(p.r, Math.max(.001, L), 6, 14), m); c.position.set((p.x1 + p.x2) / 2, (p.y1 + p.y2) / 2, 0); c.rotation.z = Math.atan2(dy, dx) - Math.PI / 2; return c;
+  }
+  const sh = new THREE.Shape(); p.pts.forEach(([x, y], i) => i ? sh.lineTo(x, y) : sh.moveTo(x, y));
+  const g = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: true, bevelSize: .03, bevelThickness: .03, bevelSegments: 2 }); g.translate(0, 0, -depth / 2);
+  return mesh(g, m);
+}
+function buildStage(st) {
+  for (const o of objMeshes) scene.remove(o.g); objMeshes = [];
+  for (const w of windFx) scene.remove(w); windFx = [];
+  for (const o of st.objs) {
+    const G = new THREE.Group(); scene.add(G);
+    if (o.vis !== 'ghost') {
+      const m = matFor(o), depth = o.vis === 'plate' ? 1.4 : o.vis === 'balloon' || o.vis === 'ball' ? 1 : .9;
+      for (const p of o.parts) G.add(partMesh(p, m, depth));
+      if (o.vis === 'balloon') { // ひも
+        const r = o.parts[0].r; const s = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, 2.6, 4), new THREE.MeshBasicMaterial({ color: 0x555555 })); s.position.set(0, -r - 1.3, 0); G.add(s);
+        const knot = new THREE.Mesh(new THREE.ConeGeometry(.07, .12, 8), m); knot.position.set(0, -r - .02, 0); knot.rotation.z = Math.PI; G.add(knot);
+      }
+      if (o.vis === 'nasu') { // へた
+        const cap = mesh(new THREE.ConeGeometry(.3, .3, 6), new THREE.MeshStandardMaterial({ color: 0x3f7a35, roughness: .6 })); const top = o.parts[o.parts.length - 2]; cap.position.set(top.x, top.y + top.r * .6, 0); G.add(cap);
+      }
+    }
+    objMeshes.push({ o, g: G });
+  }
+  // 風：流れる線
+  for (const w of st.wind || []) {
+    const grp = new THREE.Group(); grp.userData.w = w; scene.add(grp); windFx.push(grp);
+    const lm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .55, depthWrite: false });
+    for (let i = 0; i < 18; i++) { const L = new THREE.Mesh(new THREE.BoxGeometry(.7, .04, .02), lm); L.userData.u = Math.random(); L.userData.v = Math.random(); grp.add(L); }
+  }
+}
+
+// カメラ：フライ返しから一番遠い物までが、上下の文字の間に入るように
+let VW = 1, VH = 1;
+function stageRect(st) {
+  let x1 = 6.5, y1 = 4.6;
+  for (const o of st.objs) {
+    const ex = (o.mv && o.mv.ax ? Math.abs(o.mv.ax) : 0), ey = (o.mv && o.mv.ay ? Math.abs(o.mv.ay) : 0);
+    for (const p of o.parts) {
+      const xs = p.k === 'p' ? p.pts.map(q => q[0]) : p.k === 's' ? [p.x1, p.x2] : [p.x], ys = p.k === 'p' ? p.pts.map(q => q[1]) : p.k === 's' ? [p.y1, p.y2] : [p.y];
+      const r = p.k === 'c' ? p.r : p.k === 'b' ? Math.max(p.w, p.h) / 2 : p.k === 's' ? p.r : 0;
+      const R = (o.mv && (o.mv.rw || o.mv.ra)) ? Math.max(...xs.map((x, i) => Math.hypot(x, ys[i]))) + r : 0;
+      x1 = Math.max(x1, o.x + ex + Math.max(R, Math.max(...xs) + r)); y1 = Math.max(y1, o.y + ey + Math.max(R, Math.max(...ys) + r));
+    }
+  }
+  return { x0: .05, x1: x1 + .45, y0: -2.45, y1: Math.max(y1, SIM.PAN.y + 3.2) + .4 };
+}
+function fitCam() {
+  const st = STAGES[cur] || STAGES[0], R = stageRect(st);
+  const top = 74, bot = 78, Hs = Math.max(100, VH - top - bot);
+  const w = R.x1 - R.x0, h = R.y1 - R.y0, s = Math.min(VW / w, Hs / h); // 1mあたりの画素
+  const cx = (R.x0 + R.x1) / 2 + (VW / s - w) * 0 ;
+  // 下をそろえる（余った分は空）
+  const yc = R.y0 + (VH - bot) / s - VH / 2 / s;
+  const dist = 40; camera.fov = 2 * Math.atan(VH / s / 2 / dist) * 180 / Math.PI; camera.aspect = VW / VH;
+  // 少し上・少し右から見下ろす（物の上の面や厚みが見えるように）
+  camera.position.set(cx + 3, yc + 6, dist); camera.lookAt(cx, yc, 0); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+  // ちょうちんは画面の上のほうに
+  const topY = yc + VH / 2 / s * (40 + 8) / 40, lw = VW / s * 1.2;
+  BG.lan.forEach((L, i) => L.position.set(cx - lw / 2 + i * lw / 8, Math.min(topY - 150 / s * 48 / 40, 14) - (i % 2) * .3, -8));
+  BG.rope.position.set(cx, BG.lan[0].position.y + .62, -8);
+  BG.sun.position.set(cx + VW / s * .55, yc + 3, -29);
+}
+function resize() { VW = innerWidth; VH = innerHeight; renderer.setSize(VW, VH, false); fitCam(); }
+function toScreen(x, y, z = 0) { const p = V3(x, y, z).project(camera); return { x: (p.x + 1) / 2 * VW, y: (1 - p.y) / 2 * VH }; }
+
+/* ===================== ゲームの流れ ===================== */
+let mode = 'title', cur = 0, G = null, hold = false, acc = 0, msgT = 0, lastSplat = 0, prevContacts = 0, clearAt = 0;
+const PROG = () => lsGet('kj_prog') || { open: 1, best: {} };
+function saveBest(i, ms) { const p = PROG(); if (!p.best[i] || ms < p.best[i]) p.best[i] = ms; p.open = Math.max(p.open, Math.min(30, i + 2)); lsSet('kj_prog', p); }
+const showPanel = id => ['#title', '#selectP', '#clearP'].forEach(p => $(p).hidden = p !== id);
+function bigMsg(t, sub = '', cls = '', dur = 1.2) { $('#msgBig').textContent = t; $('#msgBig').className = cls; $('#msgSub').textContent = sub; $('#msg').hidden = !t; msgT = dur; }
+const fmt = ms => (ms / 1000).toFixed(2);
+let tapLock = 0;
+const guard = fn => (...a) => { const n = performance.now(); if (n < tapLock) return; tapLock = n + 350; audioOn(); SND.click(); fn(...a); };
+
+function startStage(i) {
+  cur = clamp(i, 0, STAGES.length - 1); mode = 'play'; hold = false; acc = 0;
+  G = SIM.newGame(STAGES[cur]); buildStage(STAGES[cur]); fitCam();
+  showPanel(null); $('#hud').hidden = false; $('#hint').hidden = false; prevContacts = 0;
+  $('#stName').textContent = stName(cur); $('#stNo').textContent = tr('stageN', { n: cur + 1 });
+  updHud(); chop.userData.t = 0;
+  const ghost = STAGES[cur].objs.some(o => o.vis === 'ghost');
+  bigMsg(String(cur + 1), stName(cur) + (ghost ? ' ・ ' + tr('ghost') : cur === 0 ? ' ・ ' + tr('still') : ''), 'good', cur === 0 ? 2.4 : 1.4);
+}
+function updHud() { $('#tNow').textContent = fmt(G ? G.t * 1000 : 0); $('#tFail').textContent = tr('fails', { n: G ? G.fails : 0 }); }
+function toTitle() { mode = 'title'; G = null; $('#upMark').hidden = true; $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; showPanel('#title'); }
+function openSelect() {
+  mode = 'select'; $('#upMark').hidden = true; $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; showPanel('#selectP');
+  const p = PROG(), grid = $('#grid'); grid.innerHTML = '';
+  for (let i = 0; i < STAGES.length; i++) {
+    const b = document.createElement('button'), open = i < p.open, best = p.best[i];
+    b.className = best ? 'done' : open ? '' : 'lock';
+    b.innerHTML = `<b>${i + 1}</b><small>${best ? fmt(best) : open ? '' : esc(tr('locked'))}</small>`;
+    b.setAttribute('aria-label', `${i + 1} ${stName(i)}`);
+    if (open) b.onclick = guard(() => startStage(i)); else b.disabled = true;
+    grid.appendChild(b);
+  }
+}
+$('#goPlay').onclick = guard(() => { const p = PROG(); startStage(Math.min(p.open - 1, 29)); });
+$('#goSelect').onclick = guard(openSelect);
+$('#selBack').onclick = guard(toTitle);
+$('#backBtn').onclick = guard(openSelect);
+$('#clMenu').onclick = guard(openSelect);
+$('#clRetry').onclick = guard(() => startStage(cur));
+$('#clNext').onclick = guard(() => { if (cur < 29) startStage(cur + 1); else openSelect(); });
+
+// 入力：画面のどこでも押す・はなす（ボタン以外）
+canvas.addEventListener('pointerdown', e => { if (mode !== 'play') return; audioOn(); hold = true; try { canvas.setPointerCapture(e.pointerId); } catch (_) { } });
+const up = () => { if (mode === 'play' && hold) { hold = false; } };
+canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+addEventListener('keydown', e => { if (e.code === 'Space' && mode === 'play') { hold = true; e.preventDefault(); } });
+addEventListener('keyup', e => { if (e.code === 'Space') up(); });
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouchEnd < 350 && !e.target.closest('input')) e.preventDefault(); lastTouchEnd = n; }, { passive: false });
+['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+
+function onClear() {
+  mode = 'clear'; const ms = Math.round(G.t * 1000), f = G.fails; clearAt = performance.now();
+  SND.clear(); buzz([30, 40, 60]); flash();
+  bigMsg(tr('landed'), '', 'good', 1.6);
+  const p = PROG(), prevBest = p.best[cur]; saveBest(cur, ms);
+  last = { st: cur, ms, f, best: !prevBest || ms < prevBest };
+  setTimeout(() => {
+    if (mode !== 'clear') return;
+    $('#hud').hidden = true; $('#hint').hidden = true; $('#stillRing').hidden = true; $('#upMark').hidden = true;
+    $('#clName').textContent = `${cur + 1}. ${stName(cur)}`; $('#clTime').innerHTML = `${fmt(ms)}<small>${esc(tr('sec'))}</small>`;
+    $('#clSub').textContent = tr('clSub', { f }) + (cur === 29 ? ' ・ ' + tr('allClear') : '');
+    $('#nameIn').value = lsGet('kj_name') || ''; $('#send').disabled = false; $('#sendMsg').textContent = ''; $('#sendMsg').className = 'note';
+    $('#clNext').textContent = cur < 29 ? tr('next') : tr('menu');
+    showPanel('#clearP'); loadRank(cur);
+  }, 1400);
+}
+function flash() { const f = $('#flash'); f.style.transition = 'none'; f.style.opacity = .7; requestAnimationFrame(() => { f.style.transition = ''; f.style.opacity = 0; }); }
+let last = null;
+$('#clShare').onclick = () => {
+  if (!last) return;
+  const url = GAME_URL + '?st=' + (last.st + 1);
+  const text = tr('shareT', { name: stName(last.st), t: fmt(last.ms), n: last.st + 1 }) + '\n' + tr('tags') + '\n' + url;
+  open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+};
+
+/* ===================== ランキング（面ごと） ===================== */
+const FB = { apiKey: 'AIzaSyCMwGPHPKsDByV07QPq56-PGXTDxcYVNfc', databaseURL: 'https://furoya-no-onna-default-rtdb.asia-southeast1.firebasedatabase.app' };
+async function fbAuth() {
+  let a = lsGet('kj_auth'); if (a && a.exp > Date.now() + 60000) return a;
+  if (a && a.refresh) {
+    try { const r = await fetch('https://securetoken.googleapis.com/v1/token?key=' + FB.apiKey, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(a.refresh) });
+      if (r.ok) { const j = await r.json(); a = { uid: j.user_id, token: j.id_token, refresh: j.refresh_token, exp: Date.now() + (+j.expires_in) * 1000 }; lsSet('kj_auth', a); return a; } } catch (_) { }
+  }
+  const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB.apiKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ returnSecureToken: true }) });
+  if (!r.ok) throw new Error('auth'); const j = await r.json(); a = { uid: j.localId, token: j.idToken, refresh: j.refreshToken, exp: Date.now() + (+j.expiresIn) * 1000 }; lsSet('kj_auth', a); return a;
+}
+async function fbGet(path, q) { const r = await fetch(FB.databaseURL + '/' + path + '.json' + (q || '')); if (!r.ok) throw new Error('get'); return r.json(); }
+async function fbPut(path, val, a) { const r = await fetch(FB.databaseURL + '/' + path + '.json?auth=' + encodeURIComponent(a.token), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(val) }); if (!r.ok) throw new Error('put ' + r.status); return r.json(); }
+async function loadRank(i) {
+  const ol = $('#rlist'); ol.innerHTML = `<li class="rempty">${esc(tr('rLoading'))}</li>`;
+  try {
+    const [d, hd] = await Promise.all([fbGet('konnyaku/st/' + (i + 1), '?orderBy=%22s%22&limitToFirst=60'), fbGet('konnyaku/hidden').catch(() => null)]);
+    const me = (lsGet('kj_auth') || {}).uid;
+    const list = Object.entries(d || {}).filter(([u, v]) => !(hd && hd[u]) && v && typeof v.s === 'number').map(([u, v]) => ({ u, ...v })).sort((a, b) => a.s - b.s || a.t - b.t).slice(0, 50);
+    if (!list.length) { ol.innerHTML = `<li class="rempty">${esc(tr('rEmpty'))}</li>`; return; }
+    ol.innerHTML = list.map((e, k) => `<li class="${e.u === me ? 'me' : ''}"><span class="no">${k + 1}</span><span class="nm">${esc(e.n)}</span><span class="sc">${fmt(e.s)}</span></li>`).join('');
+  } catch (e) { ol.innerHTML = `<li class="rempty">${esc(tr('rFail'))}</li>`; }
+}
+const NG = ['ちんこ', 'ちんぽ', 'まんこ', 'せっくす', 'セックス', 'きんたま', 'レイプ', '死ね', 'しね', '殺す', 'ころす', 'ガイジ', 'キチガイ', 'きちがい', 'ニガー', 'チョン', '支那', 'fuck', 'shit', 'bitch', 'cunt', 'dick', 'pussy', 'nigger', 'nigga', 'faggot', 'retard', 'whore', 'slut', 'rape', 'porn', 'nazi', 'hitler', '씨발', '시발', '병신', '좆', '肏', '屄', '屌', '幹你', '操你', '婊子'];
+const badName = s => { const n = s.normalize('NFKC').toLowerCase().replace(/[\s・._\-ー〜~!！?？*＊]/g, ''); return NG.some(w => n.includes(w.normalize('NFKC').toLowerCase())); };
+$('#send').onclick = async () => {
+  const name = $('#nameIn').value.trim().replace(/\s+/g, ' ').slice(0, 12), msg = $('#sendMsg');
+  msg.className = 'note';
+  if (!name) { msg.textContent = tr('needName'); msg.className = 'note err'; return; }
+  if (badName(name)) { msg.textContent = tr('badName'); msg.className = 'note err'; return; }
+  if (!last) return;
+  $('#send').disabled = true; msg.textContent = tr('sending'); lsSet('kj_name', name);
+  try {
+    const a = await fbAuth(), path = 'konnyaku/st/' + (last.st + 1) + '/' + a.uid;
+    const mine = await fbGet(path).catch(() => null);
+    if (mine && mine.s <= last.ms) { msg.textContent = tr('notBest'); loadRank(last.st); return; }
+    await fbPut(path, { n: name, s: last.ms, f: Math.min(9999, last.f), t: { '.sv': 'timestamp' }, v: 1 }, a);
+    msg.textContent = tr('sent'); loadRank(last.st);
+  } catch (e) { $('#send').disabled = false; msg.className = 'note err'; msg.textContent = tr('sendFail'); }
+};
+
+/* ===================== まわす ===================== */
+let lastT = performance.now(), tAll = 0;
+const _v = new THREE.Vector3();
+let MANUAL = false;
+function frame(now) {
+  const dt = Math.min(.1, (now - lastT) / 1000); lastT = now;
+  if (!MANUAL) stepAll(dt);
+  requestAnimationFrame(frame);
+}
+function stepAll(dt, draw = true) {
+  tAll += dt;
+  if (msgT > 0) { msgT -= dt; if (msgT <= 0) $('#msg').hidden = true; }
+  if (mode === 'play' && G) {
+    acc += dt; let n = 0;
+    while (acc >= SIM.DT - 1e-9 && n < 24) {
+      const wasMode = G.pan.mode;
+      const r = SIM.stepGame(G, hold); acc -= SIM.DT; n++;
+      if (wasMode === 'wind' && G.pan.mode === 'up') { SND.flip(G.pan.lastPower || 0); buzz(15); }
+      if (r === 'fail') { SND.plop(); buzz([20, 30, 20]); bigMsg(tr('plop'), tr('plopSub'), 'bad', 1.0); chop.userData.t = 0; }
+      if (r === 'clear') { onClear(); break; }
+      // 着地した瞬間の音
+      const c = G.contacts + (G.onPan ? 1 : 0);
+      if (c > 0 && prevContacts === 0 && G.t - lastSplat > .25 && G.vmax > 1) { SND.splat(); lastSplat = G.t; }
+      prevContacts = c;
+    }
+    if (acc > SIM.DT * 4) acc = 0;
+    updHud();
+    $('#hint').classList.toggle('hold', hold);
+    $('#hintT').textContent = hold ? tr('hintHold') : tr('hintIdle');
+    $('#hint').hidden = G.pan.mode === 'up';
+  }
+  // こんにゃく・道具・物を動かす
+  if (G) {
+    kon.update(G.k.P); kon.m.visible = true;
+    const pp = SIM.panPose(G.pan.ang); panG.position.set(pp.x, pp.y, 0); panG.rotation.z = pp.a;
+    $('#gFill').style.width = ((G.pan.mode === 'wind' ? G.pan.power : 0) * 100).toFixed(1) + '%';
+    objMeshes.forEach(({ g }, i) => { const ps = G.objs[i].pose; g.position.set(ps.x, ps.y, 0); g.rotation.z = ps.a; });
+    // 箸：はじめの1秒だけ上に見せて、開く
+    chop.userData.t = (chop.userData.t || 0) + dt; const ct = chop.userData.t;
+    chop.visible = ct < 1.4; chop.position.set(SIM.PAN.x - .2, SIM.PAN.y + 2.7 + Math.max(0, ct - .5) * 3, .4);
+    const open = Math.min(1, ct * 3); chop.userData[-1].rotation.z = -.05 - open * .25; chop.userData[1].rotation.z = .05 + open * .25;
+    // 2秒の輪
+    if (mode === 'play' && G.still > .05) { const s = toScreen(G.cx, G.cy + .6); const r = $('#stillRing'); r.hidden = false; r.style.left = s.x + 'px'; r.style.top = s.y + 'px'; r.style.setProperty('--p', Math.min(1, G.still / SIM.STILL_NEED).toFixed(3)); }
+    else if (mode === 'play') $('#stillRing').hidden = true;
+    { const s = toScreen(G.cx, G.cy), um = $('#upMark'), off = mode === 'play' && s.y < 70; um.hidden = !off; if (off) um.style.left = clamp(s.x, 20, VW - 20) + 'px'; }
+  } else kon.m.visible = false;
+  // 風の線
+  for (const grp of windFx) { const w = grp.userData.w, L = Math.hypot(w.fx, w.fy) || 1; grp.children.forEach(l => { l.userData.u = (l.userData.u + dt * .5) % 1; const u = w.fx >= 0 ? l.userData.u : 1 - l.userData.u; l.position.set(w.fx ? w.x0 + (w.x1 - w.x0) * u : w.x0 + (w.x1 - w.x0) * l.userData.v, w.fy ? Math.min(w.y1, 8) * u + w.y0 * (1 - u) : w.y0 + (Math.min(w.y1, 8) - w.y0) * l.userData.v, -.6); l.rotation.z = Math.atan2(w.fy, w.fx); l.material.opacity = .5 * Math.sin(u * Math.PI); }); }
+  // 湯気
+  for (const s of steam) { const u = ((tAll * .25 + s.userData.ph) % 1); s.position.set(s.userData.x + Math.sin(tAll + s.userData.ph) * .3, -2.1 + u * 1.6, .9); s.scale.setScalar(.4 + u * .9); s.material.opacity = .22 * (1 - u) * Math.min(1, u * 5); }
+  if (draw) renderer.render(scene, camera);
+}
+
+/* ===================== 始める ===================== */
+addEventListener('resize', resize);
+resize(); applyLang();
+$('#loading').remove();
+const qst = parseInt(QS.get('st'), 10);
+if (qst >= 1 && qst <= 30) startStage(qst - 1); else showPanel('#title');
+requestAnimationFrame(frame);
+window.__kj = { get G() { return G; }, get mode() { return mode; }, startStage, setHold(h) { hold = h; }, SIM, SND, STAGES, manual(v) { MANUAL = v; }, tick(dt, draw = true) { stepAll(dt, draw); }, run(n) { for (let i = 0; i < n; i++) stepAll(SIM.DT, i === n - 1); }, toScreen, camera };
+</script>
+</body>
+</html>
