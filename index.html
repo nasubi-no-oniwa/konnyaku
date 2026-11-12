@@ -217,6 +217,13 @@ if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
 </div>
 
 <script type="module">
+
+// Xの投稿で引用するツイート（なすびのお庭の管理ページ quote/ で日本語・英語を貼りかえられる）
+var NQ=window.__nq||(window.__nq={q:{}});if(!NQ.f){NQ.f=1;fetch('https://ft-red-default-rtdb.asia-southeast1.firebasedatabase.app/xquote/g/konnyaku.json').then(r=>r.json()).then(d=>{if(d&&typeof d==='object')NQ.q=d;}).catch(()=>{});}
+function quoteURL(){let l='';try{if(typeof lang==='string')l=lang;}catch(e){}if(!l)l=document.documentElement.lang||'ja';const u=(l.slice(0,2)==='ja'?NQ.q.ja:NQ.q.en)||'';return /^https:\/\/x\.com\/[A-Za-z0-9_]{1,15}\/status\/\d{5,25}$/.test(u)?u:'';}
+function xIntent(text,url){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(q?text+'\n'+url:text)+'&url='+encodeURIComponent(q||url);}
+function xIntentT(text){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(text)+(q?'&url='+encodeURIComponent(q):'');}
+function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.text=(o.text||'')+(o.url?'\n'+o.url:'')+'\n'+q;delete o.url;return o;}
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import * as SIM from './sim.js';
 import { STAGES } from './stages.js';
@@ -662,7 +669,7 @@ $('#clVid').onclick = async () => {
   const ext = REC.blob.type.includes('mp4') ? 'mp4' : 'webm', name = `konnyaku_${last.st + 1}_${fmt(last.ms)}.${ext}`;
   const file = new File([REC.blob], name, { type: REC.blob.type });
   const text = tr('shareT', { name: stName(last.st), t: fmt(last.ms), n: last.st + 1 }) + '\n' + tr('tags') + '\n' + GAME_URL + '?st=' + (last.st + 1);
-  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share(nqS({ files: [file], text })); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(REC.blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
 };
 
@@ -765,7 +772,7 @@ $('#clShare').onclick = () => {
   if (!last) return;
   const url = GAME_URL + '?st=' + (last.st + 1);
   const text = tr('shareT', { name: stName(last.st), t: fmt(last.ms), n: last.st + 1 }) + '\n' + tr('tags') + '\n' + url;
-  open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  open(xIntentT(text), '_blank', 'noopener');
 };
 
 /* ===================== ランキング（面ごと） ===================== */
